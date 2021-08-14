@@ -1,23 +1,90 @@
-const { spawn } = require('child_process');
+// const { spawn, execFile } = require('child_process');
 
-const argumentsArray = ['macdonald.mp4', '60', '300', '200', '2', 'macdonald1.png'];
+const util = require('util');
+const exec = util.promisify(require('child_process').exec);
 
-const ls = spawn('./generator', argumentsArray);
+const fileOutputName = 'output/macdonald9.png'
 
-ls.stdout.on('data', data => {
+const objectForArray = {
+  inputFile : 'sample.mp4',
+  intervalInSecondsAsInteger: 3,
+  widthAsInteger: 300,
+  heightAsInteger: 200,
+  colums: 10,
+  fileOutputPath: fileOutputName
+}
 
-  console.log(`stdout: ${data}`);
-});
+function convertFile(objectForArray){
+  let builtArray = [];
 
-ls.stderr.on('err', data => {
+  let string = '';
 
-  console.log(`stderr: ${data}`);
-});
+  for(const variable in objectForArray){
+    console.log(objectForArray[variable])
+    string = string + ' ' + objectForArray[variable];
+    builtArray.push(objectForArray[variable])
+  }
 
-ls.on('close', code => {
+  console.log(string);
 
-  console.log(`child process exited with code ${code}`);
-});
+  return string
+
+  console.log(builtArray)
+}
+
+async function lsExample() {
+  try {
+
+    const object = convertFile(objectForArray);
+
+    let fullString = './generator' + object;
+    console.log(fullString)
+
+    const { stdout, stderr } = await exec(fullString);
+    console.log('stdout:', stdout);
+    console.log('stderr:', stderr);
+  } catch (e) {
+    console.error(e); // should contain code (exit code) and signal (that caused the termination).
+  }
+}
+
+(async function main(){
+  const response = await lsExample();
+  console.log(response);
+})()
+
+
+
+// convertFile(objectForArray);
+
+const argumentsArray = ['output/macdonald.mp4', '15', '300', '200', '2', fileOutputName];
+
+// const ls = spawn('./generator', argumentsArray);
+//
+// ls.stdout.on('data', data => {
+//
+//   console.log(`stdout: ${data}`);
+// });
+//
+// ls.stderr.on('err', data => {
+//
+//   console.log(`stderr: ${data}`);
+// });
+//
+// ls.on('close', code => {
+//
+//   console.log(`child process exited with code ${code}`);
+// });
+
+
+
+// const childProcess = execFile('./generator', argumentsArray);
+//
+// childProcess.stdout.on('data', function(data) {
+//   console.log(data.toString());
+// });
+
+
 
 // $ ./generator --help
 // Video Thumbnail Generator
