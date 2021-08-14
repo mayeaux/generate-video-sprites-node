@@ -99,23 +99,59 @@ console.log(createdArray);
 // fs.writeFileSync('./filepath.vtt', v.toString());
 
 
+// main.js
+async function spawnChild(argumentsArray) {
+  const child = spawn('./generator', argumentsArray);
 
-const argumentsArray = ['./sample.mp4', '1', '300', '200', '10', 'freddy3.png'];
+  let data = "";
+  for await (const chunk of child.stdout) {
+    console.log('stdout chunk: '+chunk);
+    data += chunk;
+  }
+  let error = "";
+  for await (const chunk of child.stderr) {
+    console.error('stderr chunk: '+chunk);
+    error += chunk;
+  }
+  const exitCode = await new Promise( (resolve, reject) => {
+    child.on('close', resolve);
+  });
+
+  if( exitCode) {
+    throw new Error( `subprocess error exit ${exitCode}, ${error}`);
+  }
+  return data;
+}
+
+const argumentsArray = ['./sample.mp4', '1', '300', '200', '10', 'freddy4.png'];
+
+async function runThis(){
+  try {
+    const response = await spawnChild(argumentsArray);
+
+    console.log(response)
+  } catch (err){
+    console.log(err);
+  }
+}
+
+runThis()
 
 
-const ls = spawn('./generator', argumentsArray);
 
-ls.stdout.on('data', data => {
-  console.log(`stdout: ${data}`);
-});
-
-ls.stderr.on('data', data => {
-  console.log(`stderr: ${data}`);
-});
-
-ls.on('close', code => {
-  console.log(`child process exited with code ${code}`);
-});
+// const ls = spawn('./generator', argumentsArray);
+//
+// ls.stdout.on('data', data => {
+//   console.log(`stdout: ${data}`);
+// });
+//
+// ls.stderr.on('data', data => {
+//   console.log(`stderr: ${data}`);
+// });
+//
+// ls.on('close', code => {
+//   console.log(`child process exited with code ${code}`);
+// });
 
 
 
