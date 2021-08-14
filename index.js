@@ -43,9 +43,12 @@ async function createVTT(){
 
   for(const thumbnailNumber of createdArray){
     const row = Math.ceil(thumbnailNumber/columns)
-    const column = thumbnailNumber % columns
+    let column = thumbnailNumber % columns
+    if(column === 0) column = column + columns
     const xValue = ( column * width ) - width
     const yValue = ( row * height ) - height
+
+    console.log(thumbnailNumber, row, column, xValue, yValue)
 
     // TODO: turn thumbnailNumber into seconds, right now it's hardcoded expecting 1 thumbnail per second
     // add line to webvtt file
