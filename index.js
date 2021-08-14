@@ -1,16 +1,16 @@
 // const { spawn, execFile } = require('child_process');
-
+const { getVideoDurationInSeconds } = require('get-video-duration')
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 
-const fileOutputName = 'output/macdonald9.png'
+const fileOutputName = 'output/macdonald10.png'
 
 const objectForArray = {
   inputFile : 'sample.mp4',
-  intervalInSecondsAsInteger: 3,
+  intervalInSecondsAsInteger: 2,
   widthAsInteger: 300,
   heightAsInteger: 200,
-  colums: 10,
+  columns: 10,
   fileOutputPath: fileOutputName
 }
 
@@ -49,8 +49,13 @@ async function lsExample() {
 }
 
 (async function main(){
-  const response = await lsExample();
+
+  const videoDurationInSeconds = Math.round(await getVideoDurationInSeconds('./sample.mp4'));
+
   console.log(response);
+
+  // const response = await lsExample();
+  // console.log(response);
 })()
 
 
