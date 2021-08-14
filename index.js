@@ -6,48 +6,6 @@ var Vtt = require('vtt-creator');
 const fs = require('fs');
 const spawn = require('child_process').spawn;
 
-
-function convertFile(objectForArray){
-  let builtArray = [];
-
-  let string = '';
-
-  for(const variable in objectForArray){
-    console.log(objectForArray[variable])
-    string = string + ' ' + objectForArray[variable];
-    builtArray.push(objectForArray[variable])
-  }
-
-  console.log(string);
-
-  return string
-
-  console.log(builtArray)
-}
-
-async function lsExample() {
-  try {
-
-    const object = convertFile(objectForArray);
-
-    let fullString = './generator' + object;
-    console.log(fullString)
-
-    console.log('Starting sprite creation')
-    const { stdout, stderr } = await exec(fullString);
-    console.log('stdout:', stdout);
-    console.log('stderr:', stderr);
-    let response = {
-      stdout, stderr
-    }
-
-    return response
-  } catch (e) {
-    console.error(e); // should contain code (exit code) and signal (that caused the termination).
-  }
-}
-
-
 const fileOutputName = 'output/macdonald19.png'
 
 const objectForArray = {
@@ -60,30 +18,66 @@ const objectForArray = {
 }
 
 
-async function main(){
-
+async function createVTT(){
   const videoDurationInSeconds = Math.round(await getVideoDurationInSeconds('./sample.mp4'));
 
   console.log(videoDurationInSeconds);
 
-  const { stdout, stderr } = await lsExample();
-  // console.log(response);
-  if(stderr){
-    console.log('error:')
-    console.log(stderr)
-  } else {
-    console.log('successfully generated sprite')
-    console.log(stdout);
+  // const createdArray = Array.from({length: videoDurationInSeconds}, (_, i) => i + 1)
+
+  const createdArray = Array.from(Array(videoDurationInSeconds).keys())
+
+  const width = 300;
+  const height = 200;
+  const columns = 3
+
+  console.log(createdArray);
+
+  for(const interval of createdArray){
+    console.log(interval)
   }
 }
 
-const createdArray = Array.from({length: 10}, (_, i) => i + 1)
 
-console.log(createdArray);
+createVTT()
+// Given 3 (d)
+1 1 1 0 0
+2 1 2 300 0
+3 1 3 600 0
+4 2 1 0 200
+5 2 2 300 200
+6 2 3 600 200
+7 3 1 0 400
+8 3 2 300 400
+9 3 3 600 400
 
-// main()
 
+row = Ceil(a / d)
+column = a % d
+x = ( column * 300 ) - 300
+y value =  ( row * 200 ) - 200
 
+0 0
+300 0
+600 0
+900 0
+1200 0
+1500 0
+1800 0
+2100 0
+2400 0
+2700 0
+0 200
+300 200
+600 200
+900 000
+1200 200
+1500 200
+1800 200
+2100 200
+2400 200
+2700 200
+0 400
 
 
 // let seconds = 7; // (assume every second so it's not a big deal')
@@ -135,7 +129,7 @@ async function runThis(){
   }
 }
 
-runThis()
+// runThis()
 
 
 
