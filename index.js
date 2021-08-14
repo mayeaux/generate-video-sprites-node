@@ -2,17 +2,9 @@
 const { getVideoDurationInSeconds } = require('get-video-duration')
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
+var Vtt = require('vtt-creator');
+const fs = require('fs');
 
-const fileOutputName = 'output/macdonald10.png'
-
-const objectForArray = {
-  inputFile : 'sample.mp4',
-  intervalInSecondsAsInteger: 2,
-  widthAsInteger: 300,
-  heightAsInteger: 200,
-  columns: 10,
-  fileOutputPath: fileOutputName
-}
 
 function convertFile(objectForArray){
   let builtArray = [];
@@ -40,6 +32,7 @@ async function lsExample() {
     let fullString = './generator' + object;
     console.log(fullString)
 
+    console.log('Starting sprite creation')
     const { stdout, stderr } = await exec(fullString);
     console.log('stdout:', stdout);
     console.log('stderr:', stderr);
@@ -48,15 +41,54 @@ async function lsExample() {
   }
 }
 
-(async function main(){
+
+const fileOutputName = 'output/macdonald15.png'
+
+const objectForArray = {
+  inputFile : './sample.mp4',
+  intervalInSecondsAsInteger: 2,
+  widthAsInteger: 300,
+  heightAsInteger: 200,
+  columns: 10,
+  fileOutputPath: fileOutputName
+}
+
+
+async function main(){
 
   const videoDurationInSeconds = Math.round(await getVideoDurationInSeconds('./sample.mp4'));
 
-  console.log(response);
+  console.log(videoDurationInSeconds);
 
-  // const response = await lsExample();
-  // console.log(response);
-})()
+  const { stdout, stderr }   = await lsExample();
+  if(stderr){
+    console.log('error:')
+    console.log(stderr)
+  } else {
+    stdout
+  }
+}
+
+// const createdArray = Array.from(Array(10).keys())
+//
+// console.log(createdArray);
+
+// main()
+
+// let seconds = 7; // (assume every second so it's not a big deal')
+// // given a row of 10:
+//
+// var v = new Vtt();
+// v.add(0, 1, '/uploads/anthony/macdonald10.png#xywh=0,0,300,200');
+// v.add(1, 2, '/uploads/anthony/macdonald10.png#xywh=300,0,300,200');
+// v.add(3, 4, '/uploads/anthony/macdonald10.png#xywh=600,0,300,200');
+//
+// console.log(v.toString());
+//
+// fs.writeFileSync('./filepath.vtt', v.toString());
+
+
+
 
 
 

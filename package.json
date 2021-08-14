@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "get-video-duration": "^4.0.0"
+    "get-video-duration": "^4.0.0",
+    "vtt-creator": "^1.1.1"
   }
 }
