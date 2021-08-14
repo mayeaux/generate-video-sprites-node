@@ -23,61 +23,76 @@ async function createVTT(){
 
   console.log(videoDurationInSeconds);
 
-  // const createdArray = Array.from({length: videoDurationInSeconds}, (_, i) => i + 1)
+  const createdArray = Array.from({length: videoDurationInSeconds}, (_, i) => i + 1)
 
-  const createdArray = Array.from(Array(videoDurationInSeconds).keys())
+  // const createdArray = Array.from(Array(videoDurationInSeconds).keys())
+
+  var v = new Vtt();
+
+  // console.log(createdArray);
+
+  // v.add(0, 1, '/uploads/anthony/macdonald10.png#xywh=0,0,300,200');
+  // v.add(1, 2, '/uploads/anthony/macdonald10.png#xywh=300,0,300,200');
+  // v.add(3, 4, '/uploads/anthony/macdonald10.png#xywh=600,0,300,200');
 
   const width = 300;
   const height = 200;
   const columns = 3
 
-  console.log(createdArray);
+  const prepend = '/uploads/anthony/macdonald10.png#xywh='
 
-  for(const interval of createdArray){
-    console.log(interval)
+  for(const thumbnailNumber of createdArray){
+    const row = Math.ceil(thumbnailNumber/columns)
+    const column = thumbnailNumber % columns
+    const xValue = ( column * width ) - width
+    const yValue = ( row * height ) - height
+
+    // TODO: turn thumbnailNumber into seconds, right now it's hardcoded expecting 1 thumbnail per second
+    // add line to webvtt file
+    v.add(thumbnailNumber - 1, thumbnailNumber,`${prepend}${xValue},${yValue},${width},${height}`);
   }
+
+  console.log(v.toString());
 }
-
-
 createVTT()
 // Given 3 (d)
-1 1 1 0 0
-2 1 2 300 0
-3 1 3 600 0
-4 2 1 0 200
-5 2 2 300 200
-6 2 3 600 200
-7 3 1 0 400
-8 3 2 300 400
-9 3 3 600 400
-
-
-row = Ceil(a / d)
-column = a % d
-x = ( column * 300 ) - 300
-y value =  ( row * 200 ) - 200
-
-0 0
-300 0
-600 0
-900 0
-1200 0
-1500 0
-1800 0
-2100 0
-2400 0
-2700 0
-0 200
-300 200
-600 200
-900 000
-1200 200
-1500 200
-1800 200
-2100 200
-2400 200
-2700 200
-0 400
+// 1 1 1 0 0
+// 2 1 2 300 0
+// 3 1 3 600 0
+// 4 2 1 0 200
+// 5 2 2 300 200
+// 6 2 3 600 200
+// 7 3 1 0 400
+// 8 3 2 300 400
+// 9 3 3 600 400
+//
+//
+// row = Ceil(a / d)
+// column = a % d
+// x = ( column * 300 ) - 300
+// y value =  ( row * 200 ) - 200
+//
+// 0 0
+// 300 0
+// 600 0
+// 900 0
+// 1200 0
+// 1500 0
+// 1800 0
+// 2100 0
+// 2400 0
+// 2700 0
+// 0 200
+// 300 200
+// 600 200
+// 900 000
+// 1200 200
+// 1500 200
+// 1800 200
+// 2100 200
+// 2400 200
+// 2700 200
+// 0 400
 
 
 // let seconds = 7; // (assume every second so it's not a big deal')
