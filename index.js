@@ -4,6 +4,7 @@ const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 var Vtt = require('vtt-creator');
 const fs = require('fs');
+const spawn = require('child_process').spawn;
 
 
 function convertFile(objectForArray){
@@ -36,17 +37,22 @@ async function lsExample() {
     const { stdout, stderr } = await exec(fullString);
     console.log('stdout:', stdout);
     console.log('stderr:', stderr);
+    let response = {
+      stdout, stderr
+    }
+
+    return response
   } catch (e) {
     console.error(e); // should contain code (exit code) and signal (that caused the termination).
   }
 }
 
 
-const fileOutputName = 'output/macdonald15.png'
+const fileOutputName = 'output/macdonald19.png'
 
 const objectForArray = {
   inputFile : './sample.mp4',
-  intervalInSecondsAsInteger: 2,
+  intervalInSecondsAsInteger: 1,
   widthAsInteger: 300,
   heightAsInteger: 200,
   columns: 10,
@@ -60,20 +66,25 @@ async function main(){
 
   console.log(videoDurationInSeconds);
 
-  const { stdout, stderr }   = await lsExample();
+  const { stdout, stderr } = await lsExample();
+  // console.log(response);
   if(stderr){
     console.log('error:')
     console.log(stderr)
   } else {
-    stdout
+    console.log('successfully generated sprite')
+    console.log(stdout);
   }
 }
 
-// const createdArray = Array.from(Array(10).keys())
-//
-// console.log(createdArray);
+const createdArray = Array.from({length: 10}, (_, i) => i + 1)
+
+console.log(createdArray);
 
 // main()
+
+
+
 
 // let seconds = 7; // (assume every second so it's not a big deal')
 // // given a row of 10:
@@ -89,55 +100,25 @@ async function main(){
 
 
 
+const argumentsArray = ['./sample.mp4', '1', '300', '200', '10', 'freddy3.png'];
+
+
+const ls = spawn('./generator', argumentsArray);
+
+ls.stdout.on('data', data => {
+  console.log(`stdout: ${data}`);
+});
+
+ls.stderr.on('data', data => {
+  console.log(`stderr: ${data}`);
+});
+
+ls.on('close', code => {
+  console.log(`child process exited with code ${code}`);
+});
+
+
 
 
 
 // convertFile(objectForArray);
-
-const argumentsArray = ['output/macdonald.mp4', '15', '300', '200', '2', fileOutputName];
-
-// const ls = spawn('./generator', argumentsArray);
-//
-// ls.stdout.on('data', data => {
-//
-//   console.log(`stdout: ${data}`);
-// });
-//
-// ls.stderr.on('err', data => {
-//
-//   console.log(`stderr: ${data}`);
-// });
-//
-// ls.on('close', code => {
-//
-//   console.log(`child process exited with code ${code}`);
-// });
-
-
-
-// const childProcess = execFile('./generator', argumentsArray);
-//
-// childProcess.stdout.on('data', function(data) {
-//   console.log(data.toString());
-// });
-
-
-
-// $ ./generator --help
-// Video Thumbnail Generator
-//
-// Usage:
-//   ./generator <video> <interval> <width> <height> <columns> <output> [<parallelism>]
-//   ./generator (-h | --help)
-//   ./generator --version
-//
-// Options:
-//   -h --help     Show this screen.
-//   --version     Show version.
-//   <video>         Video filepath.
-//   <interval>      Interval em seconds between frames.
-//   <width>         Width of each thumbnail.
-//   <height>        Height of each thumbnail.
-//   <columns>       Total number of thumbnails per line.
-//   <output>        Output.
-//   [<parallelism>]   Number of files to process in parallel
