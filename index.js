@@ -98,7 +98,7 @@ const webVTTOutputPath = `./output/${uploadTag}.vtt`
 
 const prependForVTT = `/uploads/${channelName}/${uploadTag}.png#xywh=`
 
-async function createSpriteAndThumbnails(){
+async function createSpriteAndThumbnails(inputFile, intervalInSecondsAsInteger, widthInPixels, heightInPixels, columns){
   try {
 
     const videoDurationInSeconds = Math.round(await getVideoDurationInSeconds(inputFile));
@@ -114,4 +114,6 @@ async function createSpriteAndThumbnails(){
   }
 }
 
-createSpriteAndThumbnails()
+// createSpriteAndThumbnails()
+
+module.exports = createSpriteAndThumbnails
