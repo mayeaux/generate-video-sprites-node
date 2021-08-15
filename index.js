@@ -49,7 +49,19 @@ function createVTT({ videoDurationInSeconds, height, width, columns, spriteOutpu
  * @param outputFilePath
  * @returns {Promise<string>}
  */
-async function createSprite({pathToGenerator, inputFilePath, width, height, intervalInSeconds, columns, outputFilePath }) {
+async function createSprite({pathToGenerator, intervalInSecondsAsInteger, inputFilePath, width, height, columns, outputFilePath }) {
+
+  // arguments array for the generator
+  let argumentsArray = [];
+  argumentsArray[0] = inputFilePath
+  argumentsArray[1] = intervalInSecondsAsInteger
+  argumentsArray[2] = width
+  argumentsArray[3] = height
+  argumentsArray[4] = columns;
+  argumentsArray[5] = outputFilePath;
+
+  console.log(argumentsArray);
+
   const child = spawn(pathToGenerator, argumentsArray);
 
   let data = "";
@@ -73,9 +85,6 @@ async function createSprite({pathToGenerator, inputFilePath, width, height, inte
   return data;
 }
 
-const channelName = 'anthony'
-const uploadTag = '2fd233sdd'
-
 const spriteOutputFile = `output/${uploadTag}.png`
 
 const inputFile =  './output/sample.mp4';
@@ -84,18 +93,12 @@ const widthInPixels = 300;
 const heightInPixels = 200;
 const columns = 10;
 
-// arguments array for the generator
-let argumentsArray = [];
-argumentsArray[0] = inputFile
-argumentsArray[1] = intervalInSecondsAsInteger
-argumentsArray[2] = widthInPixels
-argumentsArray[3] = heightInPixels
-argumentsArray[4] = columns;
-argumentsArray[5] = spriteOutputFile;
 
 const pathToGenerator = './generator'
 const webVTTOutputPath = `./output/${uploadTag}.vtt`
 
+const channelName = 'anthony'
+const uploadTag = '2fd233sdd'
 const spriteOutputFilePath = `/uploads/${channelName}/${uploadTag}-sprite.png`
 
 /**
@@ -109,15 +112,15 @@ const spriteOutputFilePath = `/uploads/${channelName}/${uploadTag}-sprite.png`
  * @param webVTTOutputPath
  * @returns {Promise<void>}
  */
-async function createSpriteAndThumbnails(inputFile, intervalInSecondsAsInteger, widthInPixels, heightInPixels, columns, spriteOutputFilePath, webVTTOutputPath){
+async function createSpriteAndThumbnails({ inputFile, intervalInSecondsAsInteger, widthInPixels, heightInPixels, columns, spriteOutputFilePath, webVTTOutputPath }){
   try {
 
     const videoDurationInSeconds = Math.round(await getVideoDurationInSeconds(inputFile));
 
-    const response = await createSprite({ pathToGenerator, argumentsArray });
+    const response = await createSprite({ pathToGenerator, intervalInSecondsAsInteger, inputFilePath: inputFile, height: heightInPixels, width: widthInPixels, columns, outputFilePath: spriteOutputFilePath });
     console.log(response)
 
-    const cttResponse = createVTT({ videoDurationInSeconds, height: heightInPixels, width: widthInPixels, columns, spriteOutputFilePath, outputFile: webVTTOutputPath})
+    const cttResponse = createVTT({ videoDurationInSeconds, intervalInSecondsAsInteger, height: heightInPixels, width: widthInPixels, columns, spriteOutputFilePath, outputFile: webVTTOutputPath})
     console.log(cttResponse)
 
   } catch (err){

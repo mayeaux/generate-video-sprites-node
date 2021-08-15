@@ -8,5 +8,5 @@ const columns = 10;
 const spriteOutputFilePath = './example.png';
 const webVTTOutputPath = './example.webvtt';
 
-createSpriteWithVTT(inputFile, intervalInSecondsAsInteger, widthInPixels, heightInPixels, columns, spriteOutputFilePath, webVTTOutputPath)
+createSpriteWithVTT({ inputFile, intervalInSecondsAsInteger, widthInPixels, heightInPixels, columns, spriteOutputFilePath, webVTTOutputPath })
 
