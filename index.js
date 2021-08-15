@@ -96,9 +96,21 @@ argumentsArray[5] = spriteOutputFile;
 const pathToGenerator = './generator'
 const webVTTOutputPath = `./output/${uploadTag}.vtt`
 
-const prependForVTT = `/uploads/${channelName}/${uploadTag}.png#xywh=`
+const spriteOutputFilePath = `/uploads/${channelName}/${uploadTag}-sprite.png`
+const prependForVTT = `${spriteOutputFilePath}#xywh=`
 
-async function createSpriteAndThumbnails(inputFile, intervalInSecondsAsInteger, widthInPixels, heightInPixels, columns){
+/**
+ * Main exported function that is used to compile the sprite/webvtt
+ * @param inputFile - path to the video to have sprites/webvtt created from
+ * @param intervalInSecondsAsInteger
+ * @param widthInPixels
+ * @param heightInPixels
+ * @param columns
+ * @param spriteOutputFilePath
+ * @param webVTTOutputPath
+ * @returns {Promise<void>}
+ */
+async function createSpriteAndThumbnails(inputFile, intervalInSecondsAsInteger, widthInPixels, heightInPixels, columns, spriteOutputFilePath, webVTTOutputPath){
   try {
 
     const videoDurationInSeconds = Math.round(await getVideoDurationInSeconds(inputFile));
