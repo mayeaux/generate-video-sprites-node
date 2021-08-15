@@ -1,0 +1,9 @@
+#!/bin/sh
+UNAME_S=$(uname -s)
+
+if [ "$UNAME_S" == "Darwin" ]; then
+  ln -s /usr/local/include/freetype2 /usr/local/include/freetype
+fi
+
+pip3.9 install -r requirements.txt
+chmod a+x generator
