@@ -1,3 +1,12 @@
 const createSpriteWithVTT = require('./index')
 
-console.log(createSpriteWithVTT)
+const inputFile = './example.mp4';
+const intervalInSecondsAsInteger = 1;
+const widthInPixels = 300;
+const heightInPixels = 200;
+const columns = 10;
+const spriteOutputFilePath = './example.png';
+const webVTTOutputPath = './example.webvtt';
+
+createSpriteWithVTT(inputFile, intervalInSecondsAsInteger, widthInPixels, heightInPixels, columns, spriteOutputFilePath, webVTTOutputPath)
+

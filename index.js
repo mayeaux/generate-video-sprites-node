@@ -11,11 +11,11 @@ process.on('unhandledRejection', console.log)
  * @param height
  * @param width
  * @param columns
- * @param prependForVTT
+ * @param spriteOutputFilePath
  * @param outputFile
  * @returns {string}
  */
-function createVTT({ videoDurationInSeconds, height, width, columns, prependForVTT, outputFile }){
+function createVTT({ videoDurationInSeconds, height, width, columns, spriteOutputFilePath, outputFile }){
   const v = new Vtt();
 
   const createdArray = Array.from({length: videoDurationInSeconds}, (_, i) => i + 1)
@@ -29,7 +29,7 @@ function createVTT({ videoDurationInSeconds, height, width, columns, prependForV
 
     // TODO: turn thumbnailNumber into seconds, right now it's hardcoded expecting 1 thumbnail per second
     // add line to webvtt file
-    v.add(thumbnailNumber - 1, thumbnailNumber,`${prependForVTT}${xValue},${yValue},${width},${height}`);
+    v.add(thumbnailNumber - 1, thumbnailNumber,`${spriteOutputFilePath}#xywh=${xValue},${yValue},${width},${height}`);
   }
 
   fs.writeFileSync(outputFile, v.toString());
@@ -97,7 +97,6 @@ const pathToGenerator = './generator'
 const webVTTOutputPath = `./output/${uploadTag}.vtt`
 
 const spriteOutputFilePath = `/uploads/${channelName}/${uploadTag}-sprite.png`
-const prependForVTT = `${spriteOutputFilePath}#xywh=`
 
 /**
  * Main exported function that is used to compile the sprite/webvtt
@@ -118,7 +117,7 @@ async function createSpriteAndThumbnails(inputFile, intervalInSecondsAsInteger, 
     const response = await createSprite({ pathToGenerator, argumentsArray });
     console.log(response)
 
-    const cttResponse = createVTT({ videoDurationInSeconds, height: heightInPixels, width: widthInPixels, columns, prependForVTT, outputFile: webVTTOutputPath})
+    const cttResponse = createVTT({ videoDurationInSeconds, height: heightInPixels, width: widthInPixels, columns, spriteOutputFilePath, outputFile: webVTTOutputPath})
     console.log(cttResponse)
 
   } catch (err){
