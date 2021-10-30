@@ -28,8 +28,9 @@ function createVTT({ videoDurationInSeconds, height, width, columns, spriteOutpu
     const yValue = ( row * height ) - height
 
     // TODO: turn thumbnailNumber into seconds, right now it's hardcoded expecting 1 thumbnail per second
+    // TODO: this path is broken
     // add line to webvtt file
-    v.add(thumbnailNumber - 1, thumbnailNumber,`${spriteOutputFilePath}#xywh=${xValue},${yValue},${width},${height}`);
+    v.add(thumbnailNumber - 1, thumbnailNumber,`/uploads/anthony/output1.png#xywh=${xValue},${yValue},${width},${height}`);
   }
 
   fs.writeFileSync(outputFile, v.toString());
@@ -85,21 +86,20 @@ async function createSprite({pathToGenerator, intervalInSecondsAsInteger, inputF
   return data;
 }
 
-const spriteOutputFile = `output/${uploadTag}.png`
-
 const inputFile =  './output/sample.mp4';
 const intervalInSecondsAsInteger = 1;
 const widthInPixels = 300;
 const heightInPixels = 200;
 const columns = 10;
 
-
-const pathToGenerator = './generator'
-const webVTTOutputPath = `./output/${uploadTag}.vtt`
-
 const channelName = 'anthony'
 const uploadTag = '2fd233sdd'
+
 const spriteOutputFilePath = `/uploads/${channelName}/${uploadTag}-sprite.png`
+const webVTTOutputPath = `./output/${uploadTag}.vtt`
+const spriteOutputFile = `output/${uploadTag}.png`
+
+const pathToGenerator = './generator'
 
 /**
  * Main exported function that is used to compile the sprite/webvtt

@@ -1,5 +1,5 @@
 .idea
-output
 node_modules
-example.webvtt
-example.png
+
+output
+videos
