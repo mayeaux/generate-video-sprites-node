@@ -131,6 +131,4 @@ async function createSpriteAndThumbnails({ inputFile, intervalInSecondsAsInteger
   }
 }
 
-// createSpriteAndThumbnails()
-
 module.exports = createSpriteAndThumbnails
