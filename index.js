@@ -15,7 +15,7 @@ process.on('unhandledRejection', console.log)
  * @param outputFile
  * @returns {string}
  */
-function createVTT({ videoDurationInSeconds, height, width, columns, spriteOutputFilePath, outputFile }){
+function createVTT({ videoDurationInSeconds, height, width, columns, spriteOutputFilePath, outputFile, prependPath, filename }){
   const v = new Vtt();
 
   const createdArray = Array.from({length: videoDurationInSeconds}, (_, i) => i + 1)
@@ -30,7 +30,7 @@ function createVTT({ videoDurationInSeconds, height, width, columns, spriteOutpu
     // TODO: turn thumbnailNumber into seconds, right now it's hardcoded expecting 1 thumbnail per second
     // TODO: this path is broken
     // add line to webvtt file
-    v.add(thumbnailNumber - 1, thumbnailNumber,`/uploads/anthony/output1.png#xywh=${xValue},${yValue},${width},${height}`);
+    v.add(thumbnailNumber - 1, thumbnailNumber,`${prependPath}/${filename}.png#xywh=${xValue},${yValue},${width},${height}`);
   }
 
   fs.writeFileSync(outputFile, v.toString());
@@ -109,18 +109,21 @@ const pathToGenerator = './generator'
  * @param heightInPixels
  * @param columns
  * @param spriteOutputFilePath
- * @param webVTTOutputPath
+ * @param webVTTOutputFilePath
  * @returns {Promise<void>}
  */
-async function createSpriteAndThumbnails({ inputFile, intervalInSecondsAsInteger, widthInPixels, heightInPixels, columns, spriteOutputFilePath, webVTTOutputPath }){
+async function createSpriteAndThumbnails({ inputFile, intervalInSecondsAsInteger, widthInPixels, heightInPixels, columns, spriteOutputFilePath, webVTTOutputFilePath, prependPath, filename }){
   try {
 
+    // used in the calculations to determine what to show when
     const videoDurationInSeconds = Math.round(await getVideoDurationInSeconds(inputFile));
 
+    // create image sprite as .png
     const response = await createSprite({ pathToGenerator, intervalInSecondsAsInteger, inputFilePath: inputFile, height: heightInPixels, width: widthInPixels, columns, outputFilePath: spriteOutputFilePath });
     console.log(response)
 
-    const cttResponse = createVTT({ videoDurationInSeconds, intervalInSecondsAsInteger, height: heightInPixels, width: widthInPixels, columns, spriteOutputFilePath, outputFile: webVTTOutputPath})
+    // create vtt file with mappings
+    const cttResponse = createVTT({ videoDurationInSeconds, intervalInSecondsAsInteger, height: heightInPixels, width: widthInPixels, columns, spriteOutputFilePath, outputFile: webVTTOutputFilePath, prependPath, filename})
     console.log(cttResponse)
 
   } catch (err){
