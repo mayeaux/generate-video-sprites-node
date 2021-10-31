@@ -112,7 +112,7 @@ const pathToGenerator = './generator'
  * @param webVTTOutputFilePath
  * @returns {Promise<void>}
  */
-async function createSpriteAndThumbnails({inputFile, intervalInSecondsAsInteger, widthInPixels, heightInPixels, columns, spriteOutputFilePath, webVTTOutputFilePath, prependPath, filename, spriteFileName }){
+async function createSpriteAndThumbnails({pathToGenerator, inputFile, intervalInSecondsAsInteger, widthInPixels, heightInPixels, columns, spriteOutputFilePath, webVTTOutputFilePath, prependPath, filename, spriteFileName }){
   try {
 
     // used in the calculations to determine what to show when
