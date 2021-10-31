@@ -18,18 +18,23 @@ process.on('unhandledRejection', console.log)
 function createVTT({ videoDurationInSeconds, height, width, columns, spriteOutputFilePath, outputFile, prependPath, filename, spriteFileName }){
   const v = new Vtt();
 
+  // create an array from 1 to the duration in seconds (ie 30)
   const createdArray = Array.from({length: videoDurationInSeconds}, (_, i) => i + 1)
 
+  // loop through the array of thumbnails
   for(const thumbnailNumber of createdArray){
+    // figure out what row the thumbnail will be on, so 1/5 = 0.2, round to 1, it's row 1
     const row = Math.ceil(thumbnailNumber/columns)
+    // modulus (remainder operator), so if thumbnail number is 6, and columns is 5, remainder is 1 and thus column is 1?
     let column = thumbnailNumber % columns
+    // if there's no remainder, it means you are at the end of the columns aka (5 % 5 = 0), so put add 5 to put it as the value
     if(column === 0) column = column + columns
+    // x value is the column number times the width, but then move over one full column width to start at the left
     const xValue = ( column * width ) - width
+    // same as above, row is the height times the row, then move up a row to start at the top
     const yValue = ( row * height ) - height
 
-    // TODO: turn thumbnailNumber into seconds, right now it's hardcoded expecting 1 thumbnail per second
-    // TODO: this path is broken
-    // add line to webvtt file
+    // add line to webvtt file (why thumbnailNumber -1 as first param?)
     v.add(thumbnailNumber - 1, thumbnailNumber,`${prependPath}/${spriteFileName}#xywh=${xValue},${yValue},${width},${height}`);
   }
 
@@ -52,7 +57,7 @@ function createVTT({ videoDurationInSeconds, height, width, columns, spriteOutpu
  */
 async function createSprite({pathToGenerator, intervalInSecondsAsInteger, inputFilePath, width, height, columns, outputFilePath }) {
 
-  // arguments array for the generator
+  // build arguments array to be plugged into generator via spawn
   let argumentsArray = [];
   argumentsArray[0] = inputFilePath
   argumentsArray[1] = intervalInSecondsAsInteger
@@ -85,21 +90,6 @@ async function createSprite({pathToGenerator, intervalInSecondsAsInteger, inputF
   }
   return data;
 }
-
-const inputFile =  './output/sample.mp4';
-const intervalInSecondsAsInteger = 1;
-const widthInPixels = 300;
-const heightInPixels = 200;
-const columns = 10;
-
-const channelName = 'anthony'
-const uploadTag = '2fd233sdd'
-
-const spriteOutputFilePath = `/uploads/${channelName}/${uploadTag}-sprite.png`
-const webVTTOutputPath = `./output/${uploadTag}.vtt`
-const spriteOutputFile = `output/${uploadTag}.png`
-
-const pathToGenerator = './generator'
 
 /**
  * Main exported function that is used to compile the sprite/webvtt
