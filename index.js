@@ -119,6 +119,7 @@ async function createSpriteAndThumbnails({inputFile, intervalInSecondsAsInteger,
     const videoDurationInSeconds = Math.round(await getVideoDurationInSeconds(inputFile));
 
     // create vtt file with mappings
+    // this is sync so doesn't need to be awaited
     const cttResponse = createVTT({ videoDurationInSeconds, intervalInSecondsAsInteger, height: heightInPixels, width: widthInPixels, columns, spriteOutputFilePath, outputFile: webVTTOutputFilePath, prependPath, filename, spriteFileName })
     console.log(cttResponse)
 
