@@ -113,17 +113,14 @@ async function createSprite({pathToGenerator, intervalInSecondsAsInteger, inputF
  * @param webVTTOutputFilePath
  * @returns {Promise<void>}
  */
-async function createSpriteAndThumbnails({pathToGenerator, inputFile, intervalInSecondsAsInteger, widthInPixels, heightInPixels, columns, spriteOutputFilePath, webVTTOutputFilePath, prependPath, filename, spriteFileName }){
+async function createSpriteAndThumbnails({pathToGenerator, inputFile, intervalInSecondsAsInteger, heightInPixels, columns, spriteOutputFilePath, webVTTOutputFilePath, prependPath, filename, spriteFileName }){
   try {
 
-
-    console.log(inputFile);
     // used in the calculations to determine what to show when
     const videoDurationInSeconds = Math.round(await getVideoDurationInSeconds(inputFile));
 
     const ffprobeData = await ffprobePromise(inputFile);
-    console.log(ffprobeData);
-    console.log(ffprobeData.streams[0]);
+
     let videoStream;
     for(const stream of ffprobeData.streams){
       if(stream.codec_type === 'video'){
@@ -132,30 +129,21 @@ async function createSpriteAndThumbnails({pathToGenerator, inputFile, intervalIn
     }
 
     const aspectRatio = videoStream.display_aspect_ratio;
-    console.log(aspectRatio);
 
     // given the height, what is the width?
     // aspect ratio is width:height
     // therefore, if the height is 200, and the aspect ratio is 2:1, the width will be 400
     function getWidthFromHeightGivenAspectRatioString(height, aspectRatio){
       const ratioValues = aspectRatio.split(':');
-      console.log(ratioValues);
       const widthRatio = ratioValues[0];
-      console.log(widthRatio);
       const heightRatio = ratioValues[1];
-      console.log(heightRatio)
       const ratioMultiplier = Number(widthRatio)/Number(heightRatio);
-      console.log(ratioMultiplier)
       const width = ratioMultiplier * Number(heightInPixels);
-      console.log(width);
       // rounding because otherwise it was throwing errors
       return Math.round(width);
     }
 
-    const widthToUse = getWidthFromHeightGivenAspectRatioString(heightInPixels, aspectRatio);
-    widthInPixels = widthToUse;
-
-    console.log(heightInPixels, widthInPixels);
+    const widthInPixels = getWidthFromHeightGivenAspectRatioString(heightInPixels, aspectRatio);
 
     // create vtt file with mappings
     // this is sync so doesn't need to be awaited
