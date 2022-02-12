@@ -15,8 +15,10 @@ process.on('unhandledRejection', console.log)
  * @param outputFile
  * @returns {string}
  */
-function createVTT({ videoDurationInSeconds, height, width, columns, spriteOutputFilePath, outputFile, prependPath, filename, spriteFileName }){
+function createVTT({ videoDurationInSeconds, height, width, columns, spriteOutputFilePath, outputFile, prependPath, filename, spriteFileName, intervalInSecondsAsInteger }){
   const v = new Vtt();
+
+  // TODO: needs to support second interval thing
 
   // create an array from 1 to the duration in seconds (ie 30)
   const createdArray = Array.from({length: videoDurationInSeconds}, (_, i) => i + 1)
@@ -35,7 +37,8 @@ function createVTT({ videoDurationInSeconds, height, width, columns, spriteOutpu
     const yValue = ( row * height ) - height
 
     // add line to webvtt file (why thumbnailNumber -1 as first param?)
-    v.add(thumbnailNumber - 1, thumbnailNumber,`${prependPath}/${spriteFileName}#xywh=${xValue},${yValue},${width},${height}`);
+    // starts as 0 because that's the first second (0 seconds)
+    v.add((thumbnailNumber * intervalInSecondsAsInteger) - intervalInSecondsAsInteger, thumbnailNumber * intervalInSecondsAsInteger,`${prependPath}/${spriteFileName}#xywh=${xValue},${yValue},${width},${height}`);
   }
 
   fs.writeFileSync(outputFile, v.toString());
@@ -59,6 +62,8 @@ async function createSprite({pathToGenerator, intervalInSecondsAsInteger, inputF
 
   // build arguments array to be plugged into generator via spawn
   let argumentsArray = [];
+  console.log(inputFilePath)
+
   argumentsArray[0] = inputFilePath
   argumentsArray[1] = intervalInSecondsAsInteger
   argumentsArray[2] = width
