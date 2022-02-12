@@ -14,14 +14,32 @@ const totalKb = 2100;
 const totalTargetSize = 500;
 const totalWidth = columns * imageWidth;
 
-const amountToSplit = Math.floor(totalKb/totalTargetSize) // 4
 
-const howManySplits = Math.floor(rows/amountToSplit);
+const howManySplits = Math.floor(totalKb/totalTargetSize) // 4
+// console.log(howManySplits);
 
-const remainder = rows % amountToSplit;
+const amountOfRowsPerSplit = Math.floor(rows/howManySplits);
 
-console.log(howManySplits);
-console.log(remainder);
+const remainder = rows % amountOfRowsPerSplit;
+
+const createdArray = Array.from({length: (howManySplits)}, (_, i) => i + 1)
+
+createdArray.forEach(function (value, i) {
+
+  let amountOfRowsToHit = amountOfRowsPerSplit;
+
+  if(value == createdArray.length){
+    amountOfRowsToHit = amountOfRowsToHit + remainder
+    console.log('add remainder');
+  }
+
+  console.log(`${value} | ${amountOfRowsToHit}`);
+});
+
+// console.log(howManySplits);
+// console.log(remainder);
+//
+// console.log(createdArray)
 
 return
 
