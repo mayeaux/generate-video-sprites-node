@@ -6,7 +6,7 @@ const filename = 'hABy9sJ'
 // the file to create sprite and vtt from
 const inputFile = `./videos/${filename}.mp4`;
 
-const spriteFileName = `${filename}_sprite.png`;
+const spriteFileName = `${filename}_sprite.webp`;
 const vttFileName = `${filename}_sprite.vtt`;
 
 // where to output the files
@@ -19,15 +19,15 @@ const prependPath = '.'
 
 /**  variables to setup the output of the sprite/vtt **/
 // how often should a snapshot be taken
-const intervalInSecondsAsInteger = 3;
+const intervalInSecondsAsInteger = 2;
 
 // TODO: generate aspect ratio properly
 // size of the hover image
-const widthInPixels = 400;
-const heightInPixels = 250;
+const widthInPixels = 140;
+const heightInPixels = 70;
 
 // how many columns to use, seems arbitrary so I'll use 5
-const columns = 5;
+const columns = 9;
 
 console.log(`inputFile: ${inputFile}`)
 console.log(`intervalInSecondsAsInteger: ${intervalInSecondsAsInteger}`)

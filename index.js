@@ -1,7 +1,9 @@
 const { getVideoDurationInSeconds } = require('get-video-duration')
+const ffprobe = require('ffprobe');
 const Vtt = require('vtt-creator');
 const fs = require('fs');
 const spawn = require('child_process').spawn;
+ffprobeStatic = require('ffprobe-static');
 
 process.on('unhandledRejection', console.log)
 
@@ -18,10 +20,15 @@ process.on('unhandledRejection', console.log)
 function createVTT({ videoDurationInSeconds, height, width, columns, spriteOutputFilePath, outputFile, prependPath, filename, spriteFileName, intervalInSecondsAsInteger }){
   const v = new Vtt();
 
-  // TODO: needs to support second interval thing
-
   // create an array from 1 to the duration in seconds (ie 30)
-  const createdArray = Array.from({length: videoDurationInSeconds}, (_, i) => i + 1)
+  const createdArray = Array.from({length: (videoDurationInSeconds/intervalInSecondsAsInteger)}, (_, i) => i + 1)
+
+  console.log('here');
+  console.log(createdArray.length);
+  console.log(columns);
+
+  console.log('amount of rows');
+  console.log(Math.ceil(createdArray.length / columns));
 
   // loop through the array of thumbnails
   for(const thumbnailNumber of createdArray){
@@ -113,6 +120,12 @@ async function createSpriteAndThumbnails({pathToGenerator, inputFile, intervalIn
     // used in the calculations to determine what to show when
     const videoDurationInSeconds = Math.round(await getVideoDurationInSeconds(inputFile));
 
+    console.log(inputFile);
+
+    const ffprobe1 = await ffprobe(inputFile, { path: ffprobeStatic.path });
+
+    console.log(ffprobe1);
+    // return
     // create vtt file with mappings
     // this is sync so doesn't need to be awaited
     const cttResponse = createVTT({ videoDurationInSeconds, intervalInSecondsAsInteger, height: heightInPixels, width: widthInPixels, columns, spriteOutputFilePath, outputFile: webVTTOutputFilePath, prependPath, filename, spriteFileName })
@@ -121,6 +134,29 @@ async function createSpriteAndThumbnails({pathToGenerator, inputFile, intervalIn
     // create image sprite as .png
     const response = await createSprite({ pathToGenerator, intervalInSecondsAsInteger, inputFilePath: inputFile, height: heightInPixels, width: widthInPixels, columns, outputFilePath: spriteOutputFilePath });
     console.log(response)
+
+    const spriteFileSize = (await fs.promises.stat(spriteOutputFilePath)).size
+
+    console.log('sprite file size in kb');
+    console.log(spriteFileSize/1000)
+
+    const roews = 26
+    const cols = 9
+    const height = heightInPixels * roews
+    const width = widthInPixels * cols
+
+    // const totalSize = roews * cols * heightInPixels * widthInPixels;
+
+    console.log('ts');
+    console.log(width, height);
+
+    // if it's 1000 kb for example, and we want to split it in half
+
+    // we need the total amount of rows, and we will aim for each file to be 500kb
+    // BTW, it's not a hard break, if it's over 500kb nothing bad happens, it's an arbitrary number
+
+    // if it's 50 rows, we are like okay, average it out to 20 rows, so what is 20 rows * x columns? * width * height
+
 
   } catch (err){
     console.log(err);
