@@ -1,68 +1,104 @@
 const sharp = require("sharp");
 
-const originalFilename = "./output/hABy9sJ_sprite.webp";
+function clipSpriteThumbnail({
+   fullThumbnailPath,
+   rows,
+   columns,
+   imageWidth,
+   imageHeight,
+   totalFileSize,
+   targetFileSize
+}){
 
-const image = sharp(originalFilename);
+  // path to file
+  const originalFilename = fullThumbnailPath;
 
-const rows = 13;
-const columns = 9;
+  console.log(fullThumbnailPath);
 
-const imageWidth = 140;
-const imageHeight = 70;
+  // load sharp
+  const image = sharp(originalFilename);
 
-const totalKb = 2100;
-const totalTargetSize = 500;
-const totalWidth = columns * imageWidth;
+  // width of thumbnail is column times image width
+  const totalWidth = columns * imageWidth;
 
 
-const howManySplits = Math.floor(totalKb/totalTargetSize) // 4
-// console.log(howManySplits);
+  console.log('total');
+  console.log(totalFileSize, targetFileSize)
 
-const amountOfRowsPerSplit = Math.floor(rows/howManySplits);
+  if(targetFileSize > totalFileSize) return
 
-const remainder = rows % amountOfRowsPerSplit;
+  // rough estimate of how many times to split by total size divided by target
+  const howManySplits = Math.floor(totalFileSize/targetFileSize);
 
-const createdArray = Array.from({length: (howManySplits)}, (_, i) => i + 1)
+  console.log('rows howManySplits')
+  console.log(rows, howManySplits);
 
-createdArray.forEach(function (value, i) {
+  // how many rows that should happen per file
+  const amountOfRowsPerSplit = Math.floor(rows/howManySplits);
 
-  let amountOfRowsToHit = amountOfRowsPerSplit;
+  // how many rows are left out from the split
+  const remainder = rows % amountOfRowsPerSplit;
 
-  const topPosition = (value - 1) * amountOfRowsToHit
+  // create an array for each split
+  const createdArray = Array.from({length: (howManySplits)}, (_, i) => i + 1)
 
-  if(value == createdArray.length){
-    amountOfRowsToHit = amountOfRowsToHit + remainder
-    console.log('add remainder');
-  }
+  // loop through and create splits
+  createdArray.forEach(function (value, i) {
 
-  console.log(topPosition);
-  console.log(amountOfRowsToHit);
+    // how many rows per image (remainder will be added)
+    let amountOfRowsToHit = amountOfRowsPerSplit;
 
-  image
-    .extract({ left: 0, top: topPosition * imageHeight, width: totalWidth, height: amountOfRowsToHit * imageHeight })
-    .toFile(`./output/${value}.webp`, function(err) {
-      // Save the top of the image to a file named "top.jpg"
-    });
+    console.log(rows, amountOfRowsToHit);
 
-  console.log(`${value} | ${amountOfRowsToHit}`);
-});
+    // somehow this calculates the top position?
+    // TODO: rename "startingRow" ?
+    const topPosition = (value - 1) * amountOfRowsToHit
+
+    // add remainder to final clip
+    if(value == createdArray.length){
+      amountOfRowsToHit = amountOfRowsToHit + remainder
+    }
+
+    // load details
+    const splitObject = {
+      left: 0,
+      top: topPosition * imageHeight,
+      width: totalWidth,
+      height: amountOfRowsToHit * imageHeight
+    }
+
+    console.log('split object');
+    console.log(splitObject)
+
+    // create split
+    image
+      .extract(splitObject)
+      .toFile(`./output/${value}.webp`, function(err) {
+        console.log(err);
+      }); //TODO: should make this a bit smarter
+
+    // console.log(`${value} | ${amountOfRowsToHit}`);
+  });
+}
+
+module.exports = clipSpriteThumbnail
 
 // console.log(howManySplits);
 // console.log(remainder);
 //
 // console.log(createdArray)
 
-return
+// return
 
 
-image
-  .extract({ left: 0, top: 0, width: imageWidth, height: 300 })
-  .toFile("top.jpg", function(err) {
-    // Save the top of the image to a file named "top.jpg"
-  });
-
-image
-  .extract({ left: 0, top: 300, width: imageWidth, height: 300 })
-  .toFile("bottom.jpg", function(err) {
-    // Save the bottom of the image to a file named "bottom.jpg"
-  });
+// image
+//   .extract({ left: 0, top: 0, width: imageWidth, height: 300 })
+//   .toFile("top.jpg", function(err) {
+//     // Save the top of the image to a file named "top.jpg"
+//   });
+//
+// image
+//   .extract({ left: 0, top: 300, width: imageWidth, height: 300 })
+//   .toFile("bottom.jpg", function(err) {
+//     // Save the bottom of the image to a file named "bottom.jpg"
+//   });

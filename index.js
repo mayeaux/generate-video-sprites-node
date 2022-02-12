@@ -4,6 +4,7 @@ const Vtt = require('vtt-creator');
 const fs = require('fs');
 const spawn = require('child_process').spawn;
 ffprobeStatic = require('ffprobe-static');
+const clipThumbnail = require('./clip');
 
 process.on('unhandledRejection', console.log)
 
@@ -23,13 +24,6 @@ function createVTT({ videoDurationInSeconds, height, width, columns, spriteOutpu
   // this actually maps to 'amount of thumbnails'
   // create an array from 1 to the duration in seconds (ie 30)
   const createdArray = Array.from({length: (videoDurationInSeconds/intervalInSecondsAsInteger)}, (_, i) => i + 1)
-
-  console.log('here');
-  console.log(createdArray.length);
-  console.log(columns);
-
-  console.log('amount of rows');
-  console.log(Math.ceil(createdArray.length / columns));
 
   // loop through the array of thumbnails
   for(const thumbnailNumber of createdArray){
@@ -70,7 +64,6 @@ async function createSprite({pathToGenerator, intervalInSecondsAsInteger, inputF
 
   // build arguments array to be plugged into generator via spawn
   let argumentsArray = [];
-  console.log(inputFilePath)
 
   argumentsArray[0] = inputFilePath
   argumentsArray[1] = intervalInSecondsAsInteger
@@ -78,8 +71,6 @@ async function createSprite({pathToGenerator, intervalInSecondsAsInteger, inputF
   argumentsArray[3] = height
   argumentsArray[4] = columns;
   argumentsArray[5] = outputFilePath;
-
-  console.log(argumentsArray);
 
   const child = spawn(pathToGenerator, argumentsArray);
 
@@ -120,15 +111,33 @@ async function createSpriteAndThumbnails({pathToGenerator, inputFile, intervalIn
 
     // TODO: get from ffmpeg (Math.ceil)
     const ffprobe1 = await ffprobe(inputFile, { path: ffprobeStatic.path });
-    console.log(ffprobe1);
+    // console.log(ffprobe1);
+
+    let videoStream;
+    for(const stream of ffprobe1.streams){
+      if(stream.codec_type === 'video'){
+        videoStream = stream
+      }
+    }
+
+    const aspectRatio = videoStream.display_aspect_ratio
+    const videoDurationInSeconds = Math.ceil(Number(videoStream.duration));
+
+    console.log(videoStream);
+
     // used in the calculations to determine what to show when
-    const videoDurationInSeconds = Math.round(await getVideoDurationInSeconds(inputFile));
+    // const videoDurationInSeconds = Math.round(await getVideoDurationInSeconds(inputFile));
+
+    console.log(videoDurationInSeconds);
 
     // create image sprite as .png
     const response = await createSprite({ pathToGenerator, intervalInSecondsAsInteger, inputFilePath: inputFile, height: heightInPixels, width: widthInPixels, columns, outputFilePath: spriteOutputFilePath });
     console.log(response)
 
-    const spriteFileSizeInKb = (await fs.promises.stat(spriteOutputFilePath)).size
+    const spriteFileSizeInKb = ((await fs.promises.stat(spriteOutputFilePath)).size/1000)
+
+    console.log('sprite file size in kb');
+    console.log(spriteFileSizeInKb);
 
     // create vtt file with mappings
     // this is sync so doesn't need to be awaited
@@ -139,9 +148,22 @@ async function createSpriteAndThumbnails({pathToGenerator, inputFile, intervalIn
 
     const amountOfRows = Math.ceil(amountOfThumbnails / columns);
 
-    const targetSizeInKb = 500;
+    const targetSizeInKb = 80;
 
-    // await clipFile(amountOfThumbnails, amountOfRows, targetSizeInKb, spriteFileSizeInKb, columns, heightInPixels, widthInPixels)
+    console.log(amountOfRows);
+    console.log(amountOfThumbnails);
+
+    // console.log(clipThumbnail.toString());
+
+    clipThumbnail({
+      columns,
+      rows: amountOfRows,
+      fullThumbnailPath: spriteOutputFilePath,
+      imageWidth: widthInPixels,
+      imageHeight: heightInPixels,
+      totalFileSize: spriteFileSizeInKb,
+      targetFileSize: targetSizeInKb
+    })
 
   } catch (err){
     console.log(err);
