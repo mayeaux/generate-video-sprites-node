@@ -47,8 +47,8 @@ function createVTT({
     // figure out what row the thumbnail will be on, so 1/5 = 0.2, round to 1, it's row 1
     const row = Math.ceil(thumbnailNumber/columns)
 
-    console.log('row me!');
-    console.log(row);
+    // console.log('row me!');
+    // console.log(row);
 
     // modulus (remainder operator), so if thumbnail number is 6, and columns is 5, remainder is 1 and thus column is 1?
     let column = thumbnailNumber % columns
@@ -60,14 +60,24 @@ function createVTT({
     const yValue = ( row * height ) - height
 
     function getImageNumberFromRow(row){
+      for(const imageItem of mappingArray) {
+        const { startingRow, finishingRow, imageNumber } = imageItem
 
+        console.log('row me');
+        console.log(row)
+        console.log(imageItem)
+
+        if(row >= startingRow && row <= finishingRow){
+          return imageNumber
+        }
+      }
     }
 
     const filePathToUse = `${filename}-${getImageNumberFromRow(row)}`
 
     // add line to webvtt file (why thumbnailNumber -1 as first param?)
     // starts as 0 because that's the first second (0 seconds)
-    v.add((thumbnailNumber * intervalInSecondsAsInteger) - intervalInSecondsAsInteger, thumbnailNumber * intervalInSecondsAsInteger,`${prependPath}/${filePathToUse}#xywh=${xValue},${yValue},${width},${height}`);
+    v.add((thumbnailNumber * intervalInSecondsAsInteger) - intervalInSecondsAsInteger, thumbnailNumber * intervalInSecondsAsInteger,`${prependPath}/${filePathToUse}.webp#xywh=${xValue},${yValue},${width},${height}`);
   }
 
   fs.writeFileSync(outputFile, v.toString());
