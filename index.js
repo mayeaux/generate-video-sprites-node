@@ -18,8 +18,23 @@ process.on('unhandledRejection', console.log)
  * @param outputFile
  * @returns {string}
  */
-function createVTT({ videoDurationInSeconds, height, width, columns, spriteOutputFilePath, outputFile, prependPath, filename, spriteFileName, intervalInSecondsAsInteger }){
+function createVTT({
+  videoDurationInSeconds,
+  height,
+  width,
+  columns,
+  spriteOutputFilePath,
+  outputFile,
+  prependPath,
+  filename,
+  spriteFileName,
+  intervalInSecondsAsInteger,
+  mappingArray
+}){
   const v = new Vtt();
+
+  console.log('map me!');
+  console.log(mappingArray);
 
   // this actually maps to 'amount of thumbnails'
   // create an array from 1 to the duration in seconds (ie 30)
@@ -31,6 +46,10 @@ function createVTT({ videoDurationInSeconds, height, width, columns, spriteOutpu
   for(const thumbnailNumber of createdArray){
     // figure out what row the thumbnail will be on, so 1/5 = 0.2, round to 1, it's row 1
     const row = Math.ceil(thumbnailNumber/columns)
+
+    console.log('row me!');
+    console.log(row);
+
     // modulus (remainder operator), so if thumbnail number is 6, and columns is 5, remainder is 1 and thus column is 1?
     let column = thumbnailNumber % columns
     // if there's no remainder, it means you are at the end of the columns aka (5 % 5 = 0), so put add 5 to put it as the value
@@ -169,22 +188,6 @@ async function createSpriteAndThumbnails({
     console.log('sprite file size in kb');
     console.log(spriteFileSizeInKb);
 
-    /** create vtt file with mappings **/
-    // this is sync so doesn't need to be awaited
-    const cttResponse = createVTT({
-        videoDurationInSeconds,
-        intervalInSecondsAsInteger,
-        height: heightInPixels,
-        width: widthInPixels,
-        columns,
-        spriteOutputFilePath,
-        outputFile: webVTTOutputFilePath,
-        prependPath,
-        filename,
-        spriteFileName
-    })
-    console.log(cttResponse)
-
     const amountOfThumbnails = Math.ceil(videoDurationInSeconds / intervalInSecondsAsInteger);
 
     const amountOfRows = Math.ceil(amountOfThumbnails / columns);
@@ -197,7 +200,7 @@ async function createSpriteAndThumbnails({
     // console.log(clipThumbnail.toString());
 
     /** clip thumbnails into smaller chunks **/
-    clipThumbnail({
+    const mappingArray = clipThumbnail({
       columns,
       rows: amountOfRows,
       fullThumbnailPath: spriteOutputFilePath,
@@ -207,6 +210,23 @@ async function createSpriteAndThumbnails({
       targetFileSize: targetSizeInKb,
       filename
     })
+
+    /** create vtt file with mappings **/
+      // this is sync so doesn't need to be awaited
+    const cttResponse = createVTT({
+        videoDurationInSeconds,
+        intervalInSecondsAsInteger,
+        height: heightInPixels,
+        width: widthInPixels,
+        columns,
+        spriteOutputFilePath,
+        outputFile: webVTTOutputFilePath,
+        prependPath,
+        filename,
+        spriteFileName,
+        mappingArray
+      })
+    console.log(cttResponse)
 
   } catch (err){
     console.log(err);

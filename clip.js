@@ -59,7 +59,7 @@ function clipSpriteThumbnail({
     const topPosition = (value - 1) * amountOfRowsToHit
 
     console.log('starting row');
-    const startingRow = topPosition
+    const startingRow = topPosition + 1
     console.log(startingRow)
 
 
@@ -103,6 +103,8 @@ function clipSpriteThumbnail({
 
   console.log('image with rows');
   console.log(imagesWithRows)
+
+  return imagesWithRows
 
 }
 
