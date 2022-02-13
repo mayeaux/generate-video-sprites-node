@@ -8,6 +8,19 @@ const clipThumbnail = require('./clip');
 
 process.on('unhandledRejection', console.log)
 
+function getImageNumberFromRow(row, mappingArray){
+  for(const imageItem of mappingArray) {
+    const { startingRow, finishingRow, imageNumber, amountOfRowsPerSplit } = imageItem
+
+    if(row >= startingRow && row <= finishingRow){
+      return {
+        imageNumber,
+        amountOfRowsPerSplit
+      }
+    }
+  }
+}
+
 /**
  * Creates a VTT file given an amount of seconds, width, height, columns. Written to an out path.
  * @param videoDurationInSeconds
@@ -33,22 +46,15 @@ function createVTT({
 }){
   const v = new Vtt();
 
-  console.log('map me!');
-  console.log(mappingArray);
-
   // this actually maps to 'amount of thumbnails'
   // create an array from 1 to the duration in seconds (ie 30)
   const createdArray = Array.from({length: (videoDurationInSeconds/intervalInSecondsAsInteger)}, (_, i) => i + 1)
-
-  // TODO: add the logic to add here
 
   // loop through the array of thumbnails
   for(const thumbnailNumber of createdArray){
     // figure out what row the thumbnail will be on, so 1/5 = 0.2, round to 1, it's row 1
     const row = Math.ceil(thumbnailNumber/columns)
 
-    // console.log('row me!');
-    // console.log(row);
 
     // modulus (remainder operator), so if thumbnail number is 6, and columns is 5, remainder is 1 and thus column is 1?
     let column = thumbnailNumber % columns
@@ -56,24 +62,19 @@ function createVTT({
     if(column === 0) column = column + columns
     // x value is the column number times the width, but then move over one full column width to start at the left
     const xValue = ( column * width ) - width
-    // same as above, row is the height times the row, then move up a row to start at the top
-    const yValue = ( row * height ) - height
 
-    function getImageNumberFromRow(row){
-      for(const imageItem of mappingArray) {
-        const { startingRow, finishingRow, imageNumber } = imageItem
+    const { imageNumber, amountOfRowsPerSplit }  = getImageNumberFromRow(row, mappingArray);
 
-        console.log('row me');
-        console.log(row)
-        console.log(imageItem)
+    // 1-9 row unadjusted
 
-        if(row >= startingRow && row <= finishingRow){
-          return imageNumber
-        }
-      }
-    }
+    // 10-18 row - 9
 
-    const filePathToUse = `${filename}-${getImageNumberFromRow(row)}`
+
+    const adjustedRow = row - (( imageNumber - 1 ) * amountOfRowsPerSplit)
+
+    const yValue = (adjustedRow * height ) - height
+
+    const filePathToUse = `${filename}-${imageNumber}`
 
     // add line to webvtt file (why thumbnailNumber -1 as first param?)
     // starts as 0 because that's the first second (0 seconds)
@@ -191,12 +192,7 @@ async function createSpriteAndThumbnails({
       filename
     });
 
-    console.log(response)
-
     const spriteFileSizeInKb = ((await fs.promises.stat(spriteOutputFilePath)).size/1000)
-
-    console.log('sprite file size in kb');
-    console.log(spriteFileSizeInKb);
 
     const amountOfThumbnails = Math.ceil(videoDurationInSeconds / intervalInSecondsAsInteger);
 
@@ -206,8 +202,6 @@ async function createSpriteAndThumbnails({
 
     console.log(amountOfRows);
     console.log(amountOfThumbnails);
-
-    // console.log(clipThumbnail.toString());
 
     /** clip thumbnails into smaller chunks **/
     const mappingArray = clipThumbnail({

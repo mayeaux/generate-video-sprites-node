@@ -74,7 +74,7 @@ function clipSpriteThumbnail({
     console.log(finishingRow);
 
     const thingObject = {
-      startingRow, finishingRow, imageNumber: value
+      startingRow, finishingRow, imageNumber: value, amountOfRowsPerSplit
     }
 
     imagesWithRows.push(thingObject);
@@ -84,7 +84,7 @@ function clipSpriteThumbnail({
       left: 0,
       top: topPosition * imageHeight,
       width: totalWidth,
-      height: amountOfRowsToHit * imageHeight
+      height: amountOfRowsToHit * imageHeight,
     }
 
     // return response
