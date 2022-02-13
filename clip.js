@@ -45,8 +45,10 @@ function clipSpriteThumbnail({
   // create an array for each split
   const createdArray = Array.from({length: (howManySplits)}, (_, i) => i + 1)
 
-  // loop through and create splits
-  createdArray.forEach(function (value, i) {
+  console.log(createdArray)
+  for(const [index, value] of createdArray.entries()){
+    console.log('value');
+    console.log(value);
 
     // how many rows per image (remainder will be added)
     let amountOfRowsToHit = amountOfRowsPerSplit;
@@ -72,7 +74,7 @@ function clipSpriteThumbnail({
     console.log(finishingRow);
 
     const thingObject = {
-      startingRow, finishingRow
+      startingRow, finishingRow, imageNumber: value
     }
 
     imagesWithRows.push(thingObject);
@@ -85,17 +87,6 @@ function clipSpriteThumbnail({
       height: amountOfRowsToHit * imageHeight
     }
 
-    // console.log('split object');
-    // console.log(splitObject)
-
-    // (async function(){
-    //   const response = await image.extract(splitObject).toFile(`./output/${filename}-${value}.webp`)
-    //   // console.log(response);
-    // })()
-
-    // const response = await image.extract(splitObject).toFile(`./output/${filename}-${value}.webp`)
-    // console.log(response);
-    //
     // return response
     // create split
     image
@@ -104,10 +95,15 @@ function clipSpriteThumbnail({
         console.log(err);
       }); //TODO: should make this a bit smarter
 
-    // console.log(`${value} | ${amountOfRowsToHit}`);
-  });
 
-  return true
+
+    console.log('joe');
+    console.log(index, value);
+  }
+
+  console.log('image with rows');
+  console.log(imagesWithRows)
+
 }
 
 module.exports = clipSpriteThumbnail
