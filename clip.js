@@ -22,6 +22,8 @@ function clipSpriteThumbnail({
   // width of thumbnail is column times image width
   const totalWidth = columns * imageWidth;
 
+  const imagesWithRows = [];
+
 
   console.log('total');
   console.log(totalFileSize, targetFileSize)
@@ -51,14 +53,29 @@ function clipSpriteThumbnail({
 
     console.log(rows, amountOfRowsToHit);
 
-    // somehow this calculates the top position?
-    // TODO: rename "startingRow" ?
+    // really should be renamed 'starting row'
     const topPosition = (value - 1) * amountOfRowsToHit
+
+    console.log('starting row');
+    const startingRow = topPosition
+    console.log(startingRow)
+
+
 
     // add remainder to final clip
     if(value == createdArray.length){
       amountOfRowsToHit = amountOfRowsToHit + remainder
     }
+
+    console.log('finishing row');
+    const finishingRow = topPosition + amountOfRowsToHit
+    console.log(finishingRow);
+
+    const thingObject = {
+      startingRow, finishingRow
+    }
+
+    imagesWithRows.push(thingObject);
 
     // load details
     const splitObject = {
@@ -68,24 +85,24 @@ function clipSpriteThumbnail({
       height: amountOfRowsToHit * imageHeight
     }
 
-    console.log('split object');
-    console.log(splitObject)
+    // console.log('split object');
+    // console.log(splitObject)
 
-    (async function(){
-      const response = await image.extract(splitObject).toFile(`./output/${filename}-${value}.webp`)
-      console.log(response);
-    })()
+    // (async function(){
+    //   const response = await image.extract(splitObject).toFile(`./output/${filename}-${value}.webp`)
+    //   // console.log(response);
+    // })()
 
     // const response = await image.extract(splitObject).toFile(`./output/${filename}-${value}.webp`)
     // console.log(response);
     //
     // return response
     // create split
-    // image
-    //   .extract(splitObject)
-    //   .toFile(`./output/${filename}-${value}.webp`, function(err) {
-    //     console.log(err);
-    //   }); //TODO: should make this a bit smarter
+    image
+      .extract(splitObject)
+      .toFile(`./output/${filename}-${value}.webp`, function(err) {
+        console.log(err);
+      }); //TODO: should make this a bit smarter
 
     // console.log(`${value} | ${amountOfRowsToHit}`);
   });
