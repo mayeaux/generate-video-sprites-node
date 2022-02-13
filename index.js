@@ -25,6 +25,8 @@ function createVTT({ videoDurationInSeconds, height, width, columns, spriteOutpu
   // create an array from 1 to the duration in seconds (ie 30)
   const createdArray = Array.from({length: (videoDurationInSeconds/intervalInSecondsAsInteger)}, (_, i) => i + 1)
 
+  // TODO: add the logic to add here
+
   // loop through the array of thumbnails
   for(const thumbnailNumber of createdArray){
     // figure out what row the thumbnail will be on, so 1/5 = 0.2, round to 1, it's row 1
@@ -38,9 +40,15 @@ function createVTT({ videoDurationInSeconds, height, width, columns, spriteOutpu
     // same as above, row is the height times the row, then move up a row to start at the top
     const yValue = ( row * height ) - height
 
+    function getImageNumberFromRow(row){
+
+    }
+
+    const filePathToUse = `${filename}-${getImageNumberFromRow(row)}`
+
     // add line to webvtt file (why thumbnailNumber -1 as first param?)
     // starts as 0 because that's the first second (0 seconds)
-    v.add((thumbnailNumber * intervalInSecondsAsInteger) - intervalInSecondsAsInteger, thumbnailNumber * intervalInSecondsAsInteger,`${prependPath}/${spriteFileName}#xywh=${xValue},${yValue},${width},${height}`);
+    v.add((thumbnailNumber * intervalInSecondsAsInteger) - intervalInSecondsAsInteger, thumbnailNumber * intervalInSecondsAsInteger,`${prependPath}/${filePathToUse}#xywh=${xValue},${yValue},${width},${height}`);
   }
 
   fs.writeFileSync(outputFile, v.toString());
@@ -106,7 +114,19 @@ async function createSprite({pathToGenerator, intervalInSecondsAsInteger, inputF
  * @param webVTTOutputFilePath
  * @returns {Promise<void>}
  */
-async function createSpriteAndThumbnails({pathToGenerator, inputFile, intervalInSecondsAsInteger, widthInPixels, heightInPixels, columns, spriteOutputFilePath, webVTTOutputFilePath, prependPath, filename, spriteFileName }){
+async function createSpriteAndThumbnails({
+  pathToGenerator,
+  inputFile,
+  intervalInSecondsAsInteger,
+  widthInPixels,
+  heightInPixels,
+  columns,
+  spriteOutputFilePath,
+  webVTTOutputFilePath,
+  prependPath,
+  filename,
+  spriteFileName
+}){
   try {
 
     // TODO: get from ffmpeg (Math.ceil)
@@ -130,8 +150,18 @@ async function createSpriteAndThumbnails({pathToGenerator, inputFile, intervalIn
 
     console.log(videoDurationInSeconds);
 
-    // create image sprite as .png
-    const response = await createSprite({ pathToGenerator, intervalInSecondsAsInteger, inputFilePath: inputFile, height: heightInPixels, width: widthInPixels, columns, outputFilePath: spriteOutputFilePath });
+    /** create image sprite as .png **/
+    const response = await createSprite({
+      pathToGenerator,
+      intervalInSecondsAsInteger,
+      inputFilePath: inputFile,
+      height: heightInPixels,
+      width: widthInPixels,
+      columns,
+      outputFilePath: spriteOutputFilePath,
+      filename
+    });
+
     console.log(response)
 
     const spriteFileSizeInKb = ((await fs.promises.stat(spriteOutputFilePath)).size/1000)
@@ -139,9 +169,20 @@ async function createSpriteAndThumbnails({pathToGenerator, inputFile, intervalIn
     console.log('sprite file size in kb');
     console.log(spriteFileSizeInKb);
 
-    // create vtt file with mappings
+    /** create vtt file with mappings **/
     // this is sync so doesn't need to be awaited
-    const cttResponse = createVTT({ videoDurationInSeconds, intervalInSecondsAsInteger, height: heightInPixels, width: widthInPixels, columns, spriteOutputFilePath, outputFile: webVTTOutputFilePath, prependPath, filename, spriteFileName })
+    const cttResponse = createVTT({
+        videoDurationInSeconds,
+        intervalInSecondsAsInteger,
+        height: heightInPixels,
+        width: widthInPixels,
+        columns,
+        spriteOutputFilePath,
+        outputFile: webVTTOutputFilePath,
+        prependPath,
+        filename,
+        spriteFileName
+    })
     console.log(cttResponse)
 
     const amountOfThumbnails = Math.ceil(videoDurationInSeconds / intervalInSecondsAsInteger);
@@ -155,6 +196,7 @@ async function createSpriteAndThumbnails({pathToGenerator, inputFile, intervalIn
 
     // console.log(clipThumbnail.toString());
 
+    /** clip thumbnails into smaller chunks **/
     clipThumbnail({
       columns,
       rows: amountOfRows,
@@ -162,7 +204,8 @@ async function createSpriteAndThumbnails({pathToGenerator, inputFile, intervalIn
       imageWidth: widthInPixels,
       imageHeight: heightInPixels,
       totalFileSize: spriteFileSizeInKb,
-      targetFileSize: targetSizeInKb
+      targetFileSize: targetSizeInKb,
+      filename
     })
 
   } catch (err){

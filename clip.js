@@ -7,7 +7,8 @@ function clipSpriteThumbnail({
    imageWidth,
    imageHeight,
    totalFileSize,
-   targetFileSize
+   targetFileSize,
+   filename
 }){
 
   // path to file
@@ -70,15 +71,26 @@ function clipSpriteThumbnail({
     console.log('split object');
     console.log(splitObject)
 
+    (async function(){
+      const response = await image.extract(splitObject).toFile(`./output/${filename}-${value}.webp`)
+      console.log(response);
+    })()
+
+    // const response = await image.extract(splitObject).toFile(`./output/${filename}-${value}.webp`)
+    // console.log(response);
+    //
+    // return response
     // create split
-    image
-      .extract(splitObject)
-      .toFile(`./output/${value}.webp`, function(err) {
-        console.log(err);
-      }); //TODO: should make this a bit smarter
+    // image
+    //   .extract(splitObject)
+    //   .toFile(`./output/${filename}-${value}.webp`, function(err) {
+    //     console.log(err);
+    //   }); //TODO: should make this a bit smarter
 
     // console.log(`${value} | ${amountOfRowsToHit}`);
   });
+
+  return true
 }
 
 module.exports = clipSpriteThumbnail
