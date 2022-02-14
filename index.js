@@ -8,8 +8,30 @@ const clipThumbnail = require('./clip');
 
 process.on('unhandledRejection', console.log)
 
-function getImageNumberFromRow(row, mappingArray){
+const methods = ['log', 'warn']
+
+// methods.forEach(function(method) {
+//   console.log(method)
+//   var old = console[method];
+//   console[method] = function() {
+//     var stack = (new Error()).stack.split(/\n/);
+//     // Chrome includes a single "Error" line, FF doesn't.
+//     if (stack[0].indexOf('Error') === 0) {
+//       stack = stack.slice(1);
+//     }
+//     var args = [].slice.apply(arguments).concat([stack[1].trim()]);
+//     return old.apply(console, args);
+//   };
+// });
+
+global.c = {
+  l : console.log
+};
+
+function getImageNumberFromRow(mappingArray, row){
+  // loop through all the thumbnail items in the array
   for(const imageItem of mappingArray) {
+    //
     const { startingRow, finishingRow, imageNumber, amountOfRowsPerSplit } = imageItem
 
     if(row >= startingRow && row <= finishingRow){
@@ -17,6 +39,8 @@ function getImageNumberFromRow(row, mappingArray){
         imageNumber,
         amountOfRowsPerSplit
       }
+    } else {
+      // c.l(startingRow, finishingRow, row, imageNumber, amountOfRowsPerSplit)
     }
   }
 }
@@ -46,9 +70,15 @@ function createVTT({
 }){
   const v = new Vtt();
 
+  c.l(mappingArray);
+
   // this actually maps to 'amount of thumbnails'
   // create an array from 1 to the duration in seconds (ie 30)
   const createdArray = Array.from({length: (videoDurationInSeconds/intervalInSecondsAsInteger)}, (_, i) => i + 1)
+
+  c.l(createdArray.length);
+
+  // return
 
   // loop through the array of thumbnails
   for(const thumbnailNumber of createdArray){
@@ -63,7 +93,10 @@ function createVTT({
     // x value is the column number times the width, but then move over one full column width to start at the left
     const xValue = ( column * width ) - width
 
-    const { imageNumber, amountOfRowsPerSplit }  = getImageNumberFromRow(row, mappingArray);
+    c.l(row);
+
+    // based on which row is passed, know which image to point towards
+    const { imageNumber, amountOfRowsPerSplit }  = getImageNumberFromRow(mappingArray, row);
 
     // 1-9 row unadjusted
 
@@ -115,7 +148,7 @@ async function createSprite({pathToGenerator, intervalInSecondsAsInteger, inputF
   let data = "";
   // TODO: check for error here
   for await (const chunk of child.stdout) {
-    console.log('stdout chunk: '+chunk);
+    c.l('stdout chunk: '+chunk);
     data += chunk;
   }
   let error = "";
@@ -155,13 +188,20 @@ async function createSpriteAndThumbnails({
   webVTTOutputFilePath,
   prependPath,
   filename,
-  spriteFileName
+  spriteFileName,
+  debug = false,
 }){
   try {
 
+    if(!debug){
+      global.c = {
+        l : function(){}
+      };
+    }
+
     // TODO: get from ffmpeg (Math.ceil)
     const ffprobe1 = await ffprobe(inputFile, { path: ffprobeStatic.path });
-    // console.log(ffprobe1);
+    // c.l(ffprobe1);
 
     let videoStream;
     for(const stream of ffprobe1.streams){
@@ -173,12 +213,12 @@ async function createSpriteAndThumbnails({
     const aspectRatio = videoStream.display_aspect_ratio
     const videoDurationInSeconds = Math.ceil(Number(videoStream.duration));
 
-    console.log(videoStream);
+    c.l(videoStream);
 
     // used in the calculations to determine what to show when
     // const videoDurationInSeconds = Math.round(await getVideoDurationInSeconds(inputFile));
 
-    console.log(videoDurationInSeconds);
+    c.l(videoDurationInSeconds);
 
     /** create image sprite as .png **/
     const response = await createSprite({
@@ -200,11 +240,11 @@ async function createSpriteAndThumbnails({
 
     const targetSizeInKb = 80;
 
-    console.log(amountOfRows);
-    console.log(amountOfThumbnails);
+    c.l(amountOfRows);
+    c.l(amountOfThumbnails);
 
     /** clip thumbnails into smaller chunks **/
-    const mappingArray = clipThumbnail({
+    const mappingArray = await clipThumbnail({
       columns,
       rows: amountOfRows,
       fullThumbnailPath: spriteOutputFilePath,
@@ -212,7 +252,8 @@ async function createSpriteAndThumbnails({
       imageHeight: heightInPixels,
       totalFileSize: spriteFileSizeInKb,
       targetFileSize: targetSizeInKb,
-      filename
+      filename,
+      debug
     })
 
     /** create vtt file with mappings **/
@@ -228,12 +269,13 @@ async function createSpriteAndThumbnails({
         prependPath,
         filename,
         spriteFileName,
-        mappingArray
+        mappingArray,
       })
-    console.log(cttResponse)
+
+    c.l(cttResponse)
 
   } catch (err){
-    console.log(err);
+    c.l(err);
   }
 }
 

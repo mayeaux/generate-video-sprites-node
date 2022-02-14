@@ -1,7 +1,7 @@
 const createSpriteWithVTT = require('../index')
 /** input and output paths **/
 // used in the paths, could use different names if you want
-const filename = 'hABy9sJ'
+const filename = 'extrawelt'
 
 // the file to create sprite and vtt from
 const inputFile = `./videos/${filename}.mp4`;
@@ -48,6 +48,7 @@ createSpriteWithVTT({
   webVTTOutputFilePath,
   prependPath,
   filename,
-  spriteFileName
+  spriteFileName,
+  debug: true
 })
 
