@@ -21,7 +21,10 @@ const prependPath = '.'
 // how often should a snapshot be taken
 const intervalInSecondsAsInteger = 2;
 
+// in pixels
 const thumbnailLongestSide = 140;
+
+const targetSizeInKb = 80;
 
 // how many columns to use, seems arbitrary so I'll use 5
 const columns = 9;
@@ -45,6 +48,7 @@ createSpriteWithVTT({
   filename,
   spriteFileName,
   debug: true,
-  thumbnailLongestSide
+  thumbnailLongestSide,
+  targetSizeInKb,
 })
 

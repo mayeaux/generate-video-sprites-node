@@ -184,7 +184,8 @@ async function createSpriteAndThumbnails({
   filename,
   spriteFileName,
   debug = false,
-  thumbnailLongestSide
+  thumbnailLongestSide,
+  targetSizeInKb
 }){
   try {
 
@@ -194,7 +195,6 @@ async function createSpriteAndThumbnails({
       };
     }
 
-    // TODO: get from ffmpeg (Math.ceil)
     const ffprobe1 = await ffprobe(inputFile, { path: ffprobeStatic.path });
 
     let videoStream;
@@ -231,14 +231,13 @@ async function createSpriteAndThumbnails({
     widthInPixels = Math.round(imageWidth);
     heightInPixels = Math.round(imageHeight);
 
-    // const aspectRatio = videoStream.display_aspect_ratio
     const videoDurationInSeconds = Math.ceil(Number(videoStream.duration));
 
     c.l(videoStream);
-    
+
     c.l(videoDurationInSeconds);
 
-    /** create image sprite as .png **/
+    /** create image sprite as .webp **/
     const response = await createSprite({
       pathToGenerator,
       intervalInSecondsAsInteger,
@@ -259,8 +258,6 @@ async function createSpriteAndThumbnails({
     c.l('amount of columns');
     c.l(columns)
 
-    // const amountOfRows = Math.ceil(amountOfThumbnails / columns);
-
     const dimensions = sizeOf(spriteOutputFilePath);
     c.l('Image size:')
     c.l(dimensions)
@@ -268,11 +265,6 @@ async function createSpriteAndThumbnails({
     const amountOfRows = dimensions.height / heightInPixels
     c.l('amount of rows');
     c.l(amountOfRows);
-
-    const targetSizeInKb = 80;
-
-    c.l(amountOfRows);
-    c.l(amountOfThumbnails);
 
     /** clip thumbnails into smaller chunks **/
     const mappingArray = await clipThumbnail({
