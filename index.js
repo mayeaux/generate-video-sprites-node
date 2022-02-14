@@ -80,13 +80,10 @@ function createVTT({
 
   c.l(createdArray.length);
 
-  // return
-
   // loop through the array of thumbnails
   for(const thumbnailNumber of createdArray){
     // figure out what row the thumbnail will be on, so 1/5 = 0.2, round to 1, it's row 1
     const row = Math.ceil(thumbnailNumber/columns)
-
 
     // modulus (remainder operator), so if thumbnail number is 6, and columns is 5, remainder is 1 and thus column is 1?
     let column = thumbnailNumber % columns
@@ -99,11 +96,6 @@ function createVTT({
 
     // based on which row is passed, know which image to point towards
     const { imageNumber, amountOfRowsPerSplit }  = getImageNumberFromRow(mappingArray, row);
-
-    // 1-9 row unadjusted
-
-    // 10-18 row - 9
-
 
     const adjustedRow = row - (( imageNumber - 1 ) * amountOfRowsPerSplit)
 
@@ -204,7 +196,6 @@ async function createSpriteAndThumbnails({
 
     // TODO: get from ffmpeg (Math.ceil)
     const ffprobe1 = await ffprobe(inputFile, { path: ffprobeStatic.path });
-    // c.l(ffprobe1);
 
     let videoStream;
     for(const stream of ffprobe1.streams){
@@ -221,11 +212,11 @@ async function createSpriteAndThumbnails({
     }
 
     const multiply = thumbnailLongestSide / aspectRatio;
-    console.log('aspect ratio');
-    console.log(aspectRatio);
+    c.l('aspect ratio');
+    c.l(aspectRatio);
 
-    console.log('multiply');
-    console.log(multiply);
+    c.l('multiply');
+    c.l(multiply);
 
     let imageWidth = aspectRatio * multiply
     let imageHeight = imageWidth / aspectRatio;
@@ -234,9 +225,8 @@ async function createSpriteAndThumbnails({
       imageWidth = imageHeight / aspectRatio;
     }
 
-    console.log('image height, image width');
-    console.log(imageHeight, imageWidth);
-
+    c.l('image height, image width');
+    c.l(imageHeight, imageWidth);
 
     widthInPixels = Math.round(imageWidth);
     heightInPixels = Math.round(imageHeight);
@@ -245,10 +235,7 @@ async function createSpriteAndThumbnails({
     const videoDurationInSeconds = Math.ceil(Number(videoStream.duration));
 
     c.l(videoStream);
-
-    // used in the calculations to determine what to show when
-    // const videoDurationInSeconds = Math.round(await getVideoDurationInSeconds(inputFile));
-
+    
     c.l(videoDurationInSeconds);
 
     /** create image sprite as .png **/
