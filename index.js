@@ -213,29 +213,33 @@ async function createSpriteAndThumbnails({
       }
     }
 
-    // width to height
-    const aspectRatio = videoStream.width / videoStream.height;
+    let verticalVideo = videoStream.width < videoStream.height;
 
-    const reverseAspectRatio = videoStream.height/ videoStream.width;
+    let aspectRatio = videoStream.width / videoStream.height;
+    if (verticalVideo){
+      aspectRatio = videoStream.height / videoStream.width;
+    }
 
     const multiply = thumbnailLongestSide / aspectRatio;
+    console.log('aspect ratio');
+    console.log(aspectRatio);
 
-    console.log(reverseAspectRatio);
+    console.log('multiply');
     console.log(multiply);
 
     let imageWidth = aspectRatio * multiply
     let imageHeight = imageWidth / aspectRatio;
+    if(verticalVideo){
+      imageHeight = aspectRatio * multiply
+      imageWidth = imageHeight / aspectRatio;
+    }
 
-    // imageHeight = round(imageHeight)
-    // imageWidth = round(imageWidth);
+    console.log('image height, image width');
+    console.log(imageHeight, imageWidth);
+
 
     widthInPixels = Math.round(imageWidth);
     heightInPixels = Math.round(imageHeight);
-
-
-    console.log(imageHeight, imageWidth);
-
-    console.log(aspectRatio);
 
     // const aspectRatio = videoStream.display_aspect_ratio
     const videoDurationInSeconds = Math.ceil(Number(videoStream.duration));
