@@ -5,6 +5,8 @@ const fs = require('fs');
 const spawn = require('child_process').spawn;
 ffprobeStatic = require('ffprobe-static');
 const clipThumbnail = require('./clip');
+const sizeOf = require('image-size')
+
 
 process.on('unhandledRejection', console.log)
 
@@ -235,8 +237,21 @@ async function createSpriteAndThumbnails({
     const spriteFileSizeInKb = ((await fs.promises.stat(spriteOutputFilePath)).size/1000)
 
     const amountOfThumbnails = Math.ceil(videoDurationInSeconds / intervalInSecondsAsInteger);
+    c.l('amount of thumbnails');
+    c.l(amountOfThumbnails);
 
-    const amountOfRows = Math.ceil(amountOfThumbnails / columns);
+    c.l('amount of columns');
+    c.l(columns)
+
+    // const amountOfRows = Math.ceil(amountOfThumbnails / columns);
+
+    const dimensions = sizeOf(spriteOutputFilePath);
+    c.l('Image size:')
+    c.l(dimensions)
+
+    const amountOfRows = dimensions.height / heightInPixels
+    c.l('amount of rows');
+    c.l(amountOfRows);
 
     const targetSizeInKb = 80;
 

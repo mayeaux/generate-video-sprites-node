@@ -22,11 +22,17 @@ async function clipSpriteThumbnail({
 
   // load sharp
   const image = sharp(fullThumbnailPath);
+  c.l('image width, image height');
+  c.l(imageWidth, imageHeight);
 
-  const dimensions = sizeOf(fullThumbnailPath)
+  const dimensions = sizeOf(fullThumbnailPath);
+  c.l('Image size:')
+  c.l(dimensions)
 
   // width of thumbnail is column times image width
   const totalWidth = columns * imageWidth;
+  c.l('Calculated width:')
+  c.l(totalWidth);
 
   const imagesWithRows = [];
 
@@ -39,19 +45,21 @@ async function clipSpriteThumbnail({
   // rough estimate of how many times to split by total size divided by target
   const howManySplits = Math.floor(totalFileSize/targetFileSize);
 
-  c.l('rows howManySplits')
+  c.l('rows, howManyImages')
   c.l(rows, howManySplits);
 
   // TODO: here's where the bug is
   // how many rows that should happen per file
   const amountOfRowsPerSplit = Math.floor(rows/howManySplits);
 
-  c.l('amountOfRowsPerSplit rows/howManySplits');
+  c.l('amountOfRowsPerImage rows/howManySplits');
   c.l(amountOfRowsPerSplit);
 
   const remainder = rows - (amountOfRowsPerSplit * howManySplits)
   c.l('remainder');
   c.l(remainder);
+
+  // c.l(remainder * columns * )
 
 
   // it will come up with some small number like 3
@@ -105,7 +113,7 @@ async function clipSpriteThumbnail({
       console.log('LAST ONE!');
       c.l('dimensons');
       c.l(dimensions.width, dimensions.height)
-      const startingHeight =  startingRow * imageHeight;
+      const startingHeight =  (startingRow - 1) * imageHeight;
       c.l('starting height');
       c.l(startingHeight)
       finalHeight = dimensions.height - startingHeight;
