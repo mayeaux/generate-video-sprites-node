@@ -1,7 +1,7 @@
 const createSpriteWithVTT = require('../index')
 /** input and output paths **/
 // used in the paths, could use different names if you want
-const filename = 'extrawelt'
+const filename = 'tksKexZ'
 
 // the file to create sprite and vtt from
 const inputFile = `./videos/${filename}.mp4`;
@@ -26,6 +26,8 @@ const intervalInSecondsAsInteger = 2;
 const widthInPixels = 140;
 const heightInPixels = 70;
 
+const thumbnailLongestSide = 140;
+
 // how many columns to use, seems arbitrary so I'll use 5
 const columns = 9;
 
@@ -49,6 +51,7 @@ createSpriteWithVTT({
   prependPath,
   filename,
   spriteFileName,
-  debug: true
+  debug: false,
+  thumbnailLongestSide
 })
 

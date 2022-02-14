@@ -192,6 +192,7 @@ async function createSpriteAndThumbnails({
   filename,
   spriteFileName,
   debug = false,
+  thumbnailLongestSide
 }){
   try {
 
@@ -212,7 +213,31 @@ async function createSpriteAndThumbnails({
       }
     }
 
-    const aspectRatio = videoStream.display_aspect_ratio
+    // width to height
+    const aspectRatio = videoStream.width / videoStream.height;
+
+    const reverseAspectRatio = videoStream.height/ videoStream.width;
+
+    const multiply = thumbnailLongestSide / aspectRatio;
+
+    console.log(reverseAspectRatio);
+    console.log(multiply);
+
+    let imageWidth = aspectRatio * multiply
+    let imageHeight = imageWidth / aspectRatio;
+
+    // imageHeight = round(imageHeight)
+    // imageWidth = round(imageWidth);
+
+    widthInPixels = Math.round(imageWidth);
+    heightInPixels = Math.round(imageHeight);
+
+
+    console.log(imageHeight, imageWidth);
+
+    console.log(aspectRatio);
+
+    // const aspectRatio = videoStream.display_aspect_ratio
     const videoDurationInSeconds = Math.ceil(Number(videoStream.duration));
 
     c.l(videoStream);
