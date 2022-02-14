@@ -24,8 +24,6 @@ async function clipSpriteThumbnail({
   const image = sharp(fullThumbnailPath);
 
   const dimensions = sizeOf(fullThumbnailPath)
-  c.l('dimensons');
-  console.log(dimensions.width, dimensions.height)
 
   // width of thumbnail is column times image width
   const totalWidth = columns * imageWidth;
@@ -102,21 +100,29 @@ async function clipSpriteThumbnail({
 
     imagesWithRows.push(thingObject);
 
+    let finalHeight;
+    if(value === createdArray.length) {
+      console.log('LAST ONE!');
+      c.l('dimensons');
+      c.l(dimensions.width, dimensions.height)
+      const startingHeight =  startingRow * imageHeight;
+      c.l('starting height');
+      c.l(startingHeight)
+      finalHeight = dimensions.height - startingHeight;
+      c.l('final height');
+      c.l(finalHeight)
+    }
+
     // load details
     const splitObject = {
       left: 0,
       top: topPosition * imageHeight,
       width: totalWidth,
-      height: amountOfRowsToHit * imageHeight,
+      height: finalHeight || amountOfRowsToHit * imageHeight,
     }
 
     c.l('split object')
     c.l(splitObject)
-
-    if(value === createdArray.length){
-      console.log('LAST ONE!');
-      return
-    }
 
     // return response
     // create split
