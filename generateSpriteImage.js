@@ -36,7 +36,7 @@ async function convertToMostCompatible(){
         console.log('Processing finished !');
         resolve('success');
 
-      }).save(`${outputFolder}}thumb-%d.jpg`);
+      }).save(`${outputFolder}/thumb-%d.png`);
   })
 }
 

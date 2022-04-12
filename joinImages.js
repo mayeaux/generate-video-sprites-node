@@ -16,7 +16,7 @@ function createArray(columns, startingAmount){
   for(let x = 1 ; x < columns + 1; x++){
     const imageNumber = realStartingAmount + x;
     if(imageNumber <= amountOfFiles){
-      fileNameArray.push(`${prePath}/thumb-${imageNumber}.jpg`);
+      fileNameArray.push(`${prePath}/thumb-${imageNumber}.png`);
     }
   }
 
@@ -45,12 +45,26 @@ function createFullImage(rows){
 
     joinImages.joinImages(array, options).then((img) => {
       // Save image as file
-      img.toFile(`./alltogether/${x}.jpg`).then(function(){
+      img.toFile(`./alltogether/${x}.png`).then(function(){
         // console.log('all done!');
         doneImages++
         console.log(doneImages);
         console.log(rows);
         if(doneImages == rows){
+          const amountOfImages = fs.readdirSync('./alltogether').length
+
+          let arrays = [];
+
+          for(let x = 1 ; x < amountOfImages + 1; x++){
+            arrays.push(`./alltogether/${x}.png`);
+          }
+
+          joinImages.joinImages(arrays, { direction: 'vertical'}).then((img1) => {
+            img1.toFile(`./alltogether/done.webp`).then(function(){
+              console.log('ALL DONE');
+            })
+          })
+
           console.log('all done!');
         }
       });
