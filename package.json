@@ -12,6 +12,7 @@
   "dependencies": {
     "ffprobe": "^1.1.2",
     "ffprobe-static": "^3.0.0",
+    "fluent-ffmpeg": "^2.1.2",
     "get-video-duration": "^4.0.0",
     "image-size": "^1.0.1",
     "sharp": "^0.30.1",
