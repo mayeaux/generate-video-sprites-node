@@ -1,7 +1,12 @@
 const joinImages = require('join-images');
 const fs = require('fs')
+const randomstring = require("randomstring");
 
-const amountOfFiles = fs.readdirSync('./output1').length
+let dirCont = fs.readdirSync( './output1' );
+let files = dirCont.filter( function( elm ) {return elm.match(/.*\.(png?)/ig);});
+
+
+const amountOfFiles = files.length
 
 const columns = 9;
 
@@ -33,6 +38,9 @@ const rows = Math.ceil(amountOfFiles / columns);
 // console.log(rows);
 let doneImages = 0;
 function createFullImage(rows){
+  console.log(rows);
+  console.log('amount of rows');
+
 
   for(let x = 1; x < rows + 1; x++){
 
@@ -41,6 +49,7 @@ function createFullImage(rows){
       direction: 'horizontal'
     }
 
+    console.log('array here');
     console.log(array);
 
     joinImages.joinImages(array, options).then((img) => {
@@ -51,13 +60,20 @@ function createFullImage(rows){
         console.log(doneImages);
         console.log(rows);
         if(doneImages == rows){
-          const amountOfImages = fs.readdirSync('./alltogether').length
+          const dirCont = fs.readdirSync('./alltogether')
+
+          let amountOfImages = dirCont.filter( function( elm ) {return elm.match(/.*\.(png?)/ig);}).length;
+
+
+          console.log('running now');
 
           let arrays = [];
 
           for(let x = 1 ; x < amountOfImages + 1; x++){
             arrays.push(`./alltogether/${x}.png`);
           }
+
+          console.log(arrays);
 
           joinImages.joinImages(arrays, { direction: 'vertical'}).then((img1) => {
             img1.toFile(`./alltogether/done.webp`).then(function(){
@@ -67,13 +83,23 @@ function createFullImage(rows){
 
           console.log('all done!');
         }
+      }).catch(function(err){
+        console.log('err1');
+        console.log(err);
       });
+    }).catch(function(err){
+      console.log(array);
+      console.log('err2');
+      console.log(err);
     });
 
   }
 }
-
-createFullImage(rows)
+try {
+  createFullImage(rows)
+} catch (err){
+  console.log(err);
+}
 
 
 // const array = createArray(columns);
