@@ -37,7 +37,7 @@ const rows = Math.ceil(amountOfFiles / columns);
 
 // console.log(rows);
 let doneImages = 0;
-function createFullImage(rows){
+function createFullImage({ columns, existingPath }){
   console.log(rows);
   console.log('amount of rows');
 
@@ -53,6 +53,7 @@ function createFullImage(rows){
     console.log(array);
 
     joinImages.joinImages(array, options).then((img) => {
+      // TODO: refactor to async/await
       // Save image as file
       img.toFile(`./alltogether/${x}.png`).then(function(){
         // console.log('all done!');
@@ -95,11 +96,7 @@ function createFullImage(rows){
 
   }
 }
-try {
-  createFullImage(rows)
-} catch (err){
-  console.log(err);
-}
+module.exports = createFullImage;
 
 
 // const array = createArray(columns);

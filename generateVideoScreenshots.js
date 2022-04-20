@@ -3,9 +3,7 @@
 // https://stackoverflow.com/a/54903986/3973137
 // https://github.com/damianociarla/node-ffmpeg#readme
 
-
 // ffmpeg -i extrawelt.mp4 -vf fps=1/2 -f image2 -s 140x79 out%d.jpg
-
 
 const ffmpeg = require('fluent-ffmpeg');
 
@@ -15,12 +13,16 @@ const format = 'image2';
 const size = '140x79';
 const outputFolder = './output1/'
 
-async function convertToMostCompatible(){
+async function convertToMostCompatible(
+  {
+    path, fps, size, outputFolder
+  }
+){
   return new Promise(function (resolve, reject) {
-    ffmpeg(extraweltPath)
+    ffmpeg(path)
       .fps(fps)
       .format(format)
-      .size(size)
+      .outputOptions(`-s ${size}`)
       .on('start', function (commandLine) {
         console.log('Spawned Ffmpeg with command: ' + commandLine);
       })
@@ -40,4 +42,6 @@ async function convertToMostCompatible(){
   })
 }
 
-convertToMostCompatible()
+module.exports = convertToMostCompatible;
+
+// convertToMostCompatible()
