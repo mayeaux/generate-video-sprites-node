@@ -17,7 +17,7 @@ async function generateSpriteImage(){
 
   console.log(response);
 
-  const spriteResponse = createSpriteImage({ columns, existingPath: outputFolder })
+  const spriteResponse = await createSpriteImage({ columns, existingPath: outputFolder })
 
   console.log(spriteResponse);
 }
