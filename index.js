@@ -1,34 +1,11 @@
-const { getVideoDurationInSeconds } = require('get-video-duration')
 const ffprobe = require('ffprobe');
 const Vtt = require('vtt-creator');
 const fs = require('fs');
-const spawn = require('child_process').spawn;
 ffprobeStatic = require('ffprobe-static');
 const clipThumbnail = require('./clip');
 const sizeOf = require('image-size')
-
-
-process.on('unhandledRejection', console.log)
-
-const methods = ['log', 'warn']
-
-// methods.forEach(function(method) {
-//   console.log(method)
-//   var old = console[method];
-//   console[method] = function() {
-//     var stack = (new Error()).stack.split(/\n/);
-//     // Chrome includes a single "Error" line, FF doesn't.
-//     if (stack[0].indexOf('Error') === 0) {
-//       stack = stack.slice(1);
-//     }
-//     var args = [].slice.apply(arguments).concat([stack[1].trim()]);
-//     return old.apply(console, args);
-//   };
-// });
-
-global.c = {
-  l : console.log
-};
+const createSpriteImage = require('./createSpriteImage');
+require('./logging');
 
 function getImageNumberFromRow(mappingArray, row){
   // loop through all the thumbnail items in the array
@@ -72,6 +49,7 @@ function createVTT({
 }){
   const v = new Vtt();
 
+  c.l('mapping array')
   c.l(mappingArray);
 
   // this actually maps to 'amount of thumbnails'
@@ -114,66 +92,19 @@ function createVTT({
 
 }
 
-/**
- * Takes a video and outputs a sprite image when below parameters are defined
- * @param pathToGenerator
- * @param inputFilePath
- * @param width - in pixels
- * @param height - in pixels
- * @param intervalInSeconds
- * @param columns
- * @param outputFilePath
- * @returns {Promise<string>}
- */
-async function createSprite({pathToGenerator, intervalInSecondsAsInteger, inputFilePath, width, height, columns, outputFilePath }) {
-
-  // build arguments array to be plugged into generator via spawn
-  let argumentsArray = [];
-
-  argumentsArray[0] = inputFilePath
-  argumentsArray[1] = intervalInSecondsAsInteger
-  argumentsArray[2] = width
-  argumentsArray[3] = height
-  argumentsArray[4] = columns;
-  argumentsArray[5] = outputFilePath;
-
-  const child = spawn(pathToGenerator, argumentsArray);
-
-  let data = "";
-  // TODO: check for error here
-  for await (const chunk of child.stdout) {
-    c.l('stdout chunk: '+chunk);
-    data += chunk;
-  }
-  let error = "";
-  for await (const chunk of child.stderr) {
-    console.error('stderr chunk: '+chunk);
-    error += chunk;
-  }
-  const exitCode = await new Promise( (resolve, reject) => {
-    child.on('close', resolve);
-  });
-
-  if( exitCode) {
-    throw new Error( `subprocess error exit ${exitCode}, ${error}`);
-  }
-  return data;
-}
-
-/**
- * Main exported function that is used to compile the sprite/webvtt
- * @param inputFile - path to the video to have sprites/webvtt created from
- * @param intervalInSecondsAsInteger
- * @param widthInPixels
- * @param heightInPixels
- * @param columns
- * @param spriteOutputFilePath
- * @param webVTTOutputFilePath
- * @returns {Promise<void>}
- */
+// /**
+//  * Main exported function that is used to compile the sprite/webvtt
+//  * @param inputFilePath - path to the video to have sprites/webvtt created from
+//  * @param intervalInSecondsAsInteger
+//  * @param widthInPixels
+//  * @param heightInPixels
+//  * @param columns
+//  * @param spriteOutputFilePath
+//  * @param webVTTOutputFilePath
+//  * @returns {Promise<void>}
+//  */
 async function createSpriteAndThumbnails({
-  pathToGenerator,
-  inputFile,
+  inputFilePath,
   intervalInSecondsAsInteger,
   widthInPixels,
   heightInPixels,
@@ -185,7 +116,8 @@ async function createSpriteAndThumbnails({
   spriteFileName,
   debug = false,
   thumbnailLongestSide,
-  targetSizeInKb
+  targetSizeInKb,
+  outputFileDirectory
 }){
   try {
 
@@ -195,7 +127,7 @@ async function createSpriteAndThumbnails({
       };
     }
 
-    const ffprobe1 = await ffprobe(inputFile, { path: ffprobeStatic.path });
+    const ffprobe1 = await ffprobe(inputFilePath, { path: ffprobeStatic.path });
 
     let videoStream;
     for(const stream of ffprobe1.streams){
@@ -231,23 +163,24 @@ async function createSpriteAndThumbnails({
     widthInPixels = Math.round(imageWidth);
     heightInPixels = Math.round(imageHeight);
 
+    const sizeAsWidthxHeight = `${widthInPixels}x${heightInPixels}`;
+
     const videoDurationInSeconds = Math.ceil(Number(videoStream.duration));
 
     c.l(videoStream);
 
     c.l(videoDurationInSeconds);
 
-    /** create image sprite as .webp **/
-    const response = await createSprite({
-      pathToGenerator,
-      intervalInSecondsAsInteger,
-      inputFilePath: inputFile,
-      height: heightInPixels,
-      width: widthInPixels,
+    const response = await createSpriteImage({
       columns,
-      outputFilePath: spriteOutputFilePath,
-      filename
-    });
+      videoPath: inputFilePath,
+      screenshotIntervalInSeconds: intervalInSecondsAsInteger,
+      sizeAsWidthxHeight,
+      outputFolder: './output11',
+      spriteOutputFilePath
+    })
+
+    console.log(`Sprite image creation: ${response}`)
 
     const spriteFileSizeInKb = ((await fs.promises.stat(spriteOutputFilePath)).size/1000)
 
@@ -276,7 +209,8 @@ async function createSpriteAndThumbnails({
       totalFileSize: spriteFileSizeInKb,
       targetFileSize: targetSizeInKb,
       filename,
-      debug
+      debug,
+      outputFolder: outputFileDirectory
     })
 
     /** create vtt file with mappings **/
