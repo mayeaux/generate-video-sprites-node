@@ -1,4 +1,4 @@
-const createSpriteWithVTT = require('../index')
+const createSpriteWithVTT = require('./index')
 /** input and output paths **/
 // used in the paths, could use different names if you want
 const filename = 'extrawelt'

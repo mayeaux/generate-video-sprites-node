@@ -4,7 +4,7 @@ const player = new Plyr('video', {
 
   previewThumbnails: {
     enabled: true,
-    src: ['tksKexZ_sprite.vtt'] },
+    src: ['./assets/video_sprite.vtt'] },
 
   captions: { active: true } });
 

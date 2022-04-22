@@ -62,7 +62,7 @@ async function createFullImage({ columns, existingPath }){
   for(let x = 1 ; x < amountOfHorizontalImages + 1; x++){
     arrays.push(`${horizontalImagesDirectory}/${x}.png`);
   }
-  
+
   // create Sharp instance
   const verticalJoinSharpInstance = await joinImages.joinImages(arrays, { direction: 'vertical'})
 
