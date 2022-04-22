@@ -20,3 +20,7 @@ Then you can run
 You will need to serve the .vtt file from a path that your video player can access. Also, you will need to serve the sprite from a place that will be referenced in the vtt file.  
 
 Uses this Python library for generating the sprite from the video: https://github.com/flavioribeiro/video-thumbnail-generator
+
+
+
+// ffmpeg -i extrawelt.mp4 -vf fps=1/2 -f image2 -s 140x79 out%d.jpg

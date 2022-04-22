@@ -1,7 +1,24 @@
 const joinImages = require('join-images');
-const fs = require('fs');
+const fs = require('fs-extra');
 
 async function createFullImage({ columns, existingPath }){
+
+  const outputPath = existingPath;
+
+  const screenshotImagesDirectory = `${outputPath}/screenshotImages`;
+  const horizontalImagesDirectory = `${outputPath}/horizontalImages`;
+  const finalImageDirectory = `${outputPath}/finalImage`;
+
+  fs.mkdirSync(horizontalImagesDirectory, { recursive: true });
+  fs.mkdirSync(finalImageDirectory, { recursive: true });
+
+  // how many screenshot images there are in total
+  let amountOfFiles = fs.readdirSync(screenshotImagesDirectory)
+                      .filter( function( elm ) {return elm.match(/.*\.(png?)/ig);})
+                      .length;
+
+  // calculate the total amount of rows
+  const rows = Math.ceil(amountOfFiles / columns);
 
   // create array for
   function createArray(columns, startingAmount){
@@ -15,24 +32,12 @@ async function createFullImage({ columns, existingPath }){
       const imageNumber = realStartingAmount + x;
       // this conditional bugfixes where there would be one extra, I believe
       if(imageNumber <= amountOfFiles){
-        fileNameArray.push(`${prePath}/thumb-${imageNumber}.png`);
+        fileNameArray.push(`${screenshotImagesDirectory}/thumb-${imageNumber}.png`);
       }
     }
 
     return fileNameArray
   }
-
-  // how many screenshot images there are in total
-  let amountOfFiles = fs.readdirSync(existingPath)
-                      .filter( function( elm ) {return elm.match(/.*\.(png?)/ig);})
-                      .length;
-
-  // calculate the total amount of rows
-  const rows = Math.ceil(amountOfFiles / columns);
-
-  const prePath = existingPath;
-
-  const outputPath = './alltogether';
 
   // loop through all the rows and create the horizontally joined images
   for(let x = 1; x < rows + 1; x++){
@@ -44,24 +49,25 @@ async function createFullImage({ columns, existingPath }){
     const sharpHorizontalInstance = await joinImages.joinImages(array, { direction: 'horizontal'});
 
     // save Sharp instance to file
-    const horizontalImageResponse = await sharpHorizontalInstance.toFile(`${outputPath}/${x}.png`);
+    const horizontalImageResponse = await sharpHorizontalInstance.toFile(`${horizontalImagesDirectory}/${x}.png`);
   }
 
-  let amountOfHorizontalImages = fs.readdirSync(outputPath)
+  // count how many horizontal images were created
+  let amountOfHorizontalImages = fs.readdirSync(horizontalImagesDirectory)
     .filter( function( elm ) {return elm.match(/.*\.(png?)/ig);})
     .length;
 
-  // create array of next images to use
+  // create array of horizontal images to join vertically
   let arrays = [];
   for(let x = 1 ; x < amountOfHorizontalImages + 1; x++){
-    arrays.push(`${outputPath}/${x}.png`);
+    arrays.push(`${horizontalImagesDirectory}/${x}.png`);
   }
-
+  
   // create Sharp instance
   const verticalJoinSharpInstance = await joinImages.joinImages(arrays, { direction: 'vertical'})
 
   // save Sharp instance to file
-  const verticalJoinedImageResponse = await verticalJoinSharpInstance.toFile(`${outputPath}/done.webp`);
+  const verticalJoinedImageResponse = await verticalJoinSharpInstance.toFile(`${finalImageDirectory}/verticallyJoined.webp`);
 
   return 'success'
 }
