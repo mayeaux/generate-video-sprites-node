@@ -1,13 +1,11 @@
-const { getVideoDurationInSeconds } = require('get-video-duration')
 const ffprobe = require('ffprobe');
 const Vtt = require('vtt-creator');
 const fs = require('fs');
 ffprobeStatic = require('ffprobe-static');
 const clipThumbnail = require('./clip');
 const sizeOf = require('image-size')
-const generateVideoScreenshots = require('./generateVideoScreenshots');
-const createSpriteImage = require('./joinImages');
-require('logging');
+const createSpriteImage = require('./createSpriteImage');
+require('./logging');
 
 function getImageNumberFromRow(mappingArray, row){
   // loop through all the thumbnail items in the array
@@ -95,7 +93,7 @@ function createVTT({
 
 /**
  * Main exported function that is used to compile the sprite/webvtt
- * @param inputFile - path to the video to have sprites/webvtt created from
+ * @param inputFilePath - path to the video to have sprites/webvtt created from
  * @param intervalInSecondsAsInteger
  * @param widthInPixels
  * @param heightInPixels
@@ -105,7 +103,7 @@ function createVTT({
  * @returns {Promise<void>}
  */
 async function createSpriteAndThumbnails({
-  inputFile,
+  inputFilePath,
   intervalInSecondsAsInteger,
   widthInPixels,
   heightInPixels,
@@ -127,7 +125,7 @@ async function createSpriteAndThumbnails({
       };
     }
 
-    const ffprobe1 = await ffprobe(inputFile, { path: ffprobeStatic.path });
+    const ffprobe1 = await ffprobe(inputFilePath, { path: ffprobeStatic.path });
 
     let videoStream;
     for(const stream of ffprobe1.streams){
@@ -163,23 +161,24 @@ async function createSpriteAndThumbnails({
     widthInPixels = Math.round(imageWidth);
     heightInPixels = Math.round(imageHeight);
 
+    const sizeAsWidthxHeight = `${widthInPixels}x${heightInPixels}`;
+
     const videoDurationInSeconds = Math.ceil(Number(videoStream.duration));
 
     c.l(videoStream);
 
     c.l(videoDurationInSeconds);
 
-    /** create image sprite as .webp **/
-    // const response = await createSprite({
-    //   pathToGenerator,
-    //   intervalInSecondsAsInteger,
-    //   inputFilePath: inputFile,
-    //   height: heightInPixels,
-    //   width: widthInPixels,
-    //   columns,
-    //   outputFilePath: spriteOutputFilePath,
-    //   filename
-    // });
+    const response = await createSpriteImage({
+      columns,
+      videoPath: inputFilePath,
+      screenshotIntervalInSeconds: intervalInSecondsAsInteger,
+      sizeAsWidthxHeight,
+      outputFolder: './output11',
+      filename
+    })
+
+    console.log(`Sprite image creation: ${response}`)
 
     const spriteFileSizeInKb = ((await fs.promises.stat(spriteOutputFilePath)).size/1000)
 
