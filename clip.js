@@ -41,12 +41,17 @@ async function clipSpriteThumbnail({
   c.l(totalFileSize, targetFileSize)
 
   // no need to compress
-  if(targetFileSize > totalFileSize) return
+  // if(targetFileSize > totalFileSize) return
 
   // rough estimate of how many times to split by total size divided by target
-  const howManySplits = Math.floor(totalFileSize/targetFileSize);
+  // TODO: this is named wrong, should be how many images
+  let howManySplits;
+  howManySplits = Math.floor(totalFileSize/targetFileSize);
 
-  c.l('rows, howManyImages')
+  if(howManySplits == 0) howManySplits = 1;
+
+
+  c.l('rows, howManySplits')
   c.l(rows, howManySplits);
 
   // how many rows that should happen per file
@@ -130,6 +135,8 @@ async function clipSpriteThumbnail({
     }
   }
 
+  console.log('images with rows');
+  console.log(imagesWithRows);
   return imagesWithRows
 
 }

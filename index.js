@@ -49,6 +49,7 @@ function createVTT({
 }){
   const v = new Vtt();
 
+  c.l('mapping array')
   c.l(mappingArray);
 
   // this actually maps to 'amount of thumbnails'

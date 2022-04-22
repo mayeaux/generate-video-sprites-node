@@ -4,14 +4,15 @@ const fs = require("fs");
 // used in the paths, could use different names if you want
 
 // the file to create sprite and vtt from
-const inputFilePath = `./videos/extrawelt.mp4`   ;
+const inputFilePath = `./examples/assets/video.mp4`;
+// const inputFilePath = `./videos/extrawelt.mp4`;
 
 // output variables
-const filename = 'extrawelt'
+const filename = 'video'
 const spriteFileName = `${filename}_sprite.webp`;
 const vttFileName = `${filename}_sprite.vtt`;
 
-const outputFileDirectory = './processed';
+const outputFileDirectory = './assets';
 fs.mkdirSync(outputFileDirectory, { recursive: true });
 
 // where to output the files

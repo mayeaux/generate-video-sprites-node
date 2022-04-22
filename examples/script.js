@@ -2,6 +2,8 @@
 // https://github.com/sampotts/plyr/#options
 const player = new Plyr('video', {
 
+  controls: ['play-large', 'play', 'progress', 'current-time', 'duration'],
+
   previewThumbnails: {
     enabled: true,
     src: ['./assets/video_sprite.vtt'] },
