@@ -59,4 +59,5 @@ createSpriteWithVTT({
   thumbnailLongestSide,
   targetSizeInKb,
   debug,
+  outputFileDirectory
 })

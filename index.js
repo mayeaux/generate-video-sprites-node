@@ -91,17 +91,17 @@ function createVTT({
 
 }
 
-/**
- * Main exported function that is used to compile the sprite/webvtt
- * @param inputFilePath - path to the video to have sprites/webvtt created from
- * @param intervalInSecondsAsInteger
- * @param widthInPixels
- * @param heightInPixels
- * @param columns
- * @param spriteOutputFilePath
- * @param webVTTOutputFilePath
- * @returns {Promise<void>}
- */
+// /**
+//  * Main exported function that is used to compile the sprite/webvtt
+//  * @param inputFilePath - path to the video to have sprites/webvtt created from
+//  * @param intervalInSecondsAsInteger
+//  * @param widthInPixels
+//  * @param heightInPixels
+//  * @param columns
+//  * @param spriteOutputFilePath
+//  * @param webVTTOutputFilePath
+//  * @returns {Promise<void>}
+//  */
 async function createSpriteAndThumbnails({
   inputFilePath,
   intervalInSecondsAsInteger,
@@ -115,7 +115,8 @@ async function createSpriteAndThumbnails({
   spriteFileName,
   debug = false,
   thumbnailLongestSide,
-  targetSizeInKb
+  targetSizeInKb,
+  outputFileDirectory
 }){
   try {
 
@@ -175,7 +176,7 @@ async function createSpriteAndThumbnails({
       screenshotIntervalInSeconds: intervalInSecondsAsInteger,
       sizeAsWidthxHeight,
       outputFolder: './output11',
-      filename
+      spriteOutputFilePath
     })
 
     console.log(`Sprite image creation: ${response}`)
@@ -207,7 +208,8 @@ async function createSpriteAndThumbnails({
       totalFileSize: spriteFileSizeInKb,
       targetFileSize: targetSizeInKb,
       filename,
-      debug
+      debug,
+      outputFolder: outputFileDirectory
     })
 
     /** create vtt file with mappings **/

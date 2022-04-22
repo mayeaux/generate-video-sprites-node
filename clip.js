@@ -11,7 +11,8 @@ async function clipSpriteThumbnail({
    targetFileSize,
    filename,
    extract = true,
-   debug = false
+   debug = false,
+   outputFolder
 }){
 
   if(!debug){
@@ -124,7 +125,7 @@ async function clipSpriteThumbnail({
     if(extract){
       await image
         .extract(splitObject)
-        .toFile(`./output/${filename}-${value}.webp`)
+        .toFile(`${outputFolder}/${filename}-${value}.webp`)
 
     }
   }

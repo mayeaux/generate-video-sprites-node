@@ -15,7 +15,7 @@ async function generateSpriteImage(
     screenshotIntervalInSeconds,
     sizeAsWidthxHeight,
     outputFolder,
-    filename,
+    spriteOutputFilePath,
   }){
   try {
     const screenshotImagesFolder = `${outputFolder}/screenshotImages`;
@@ -30,7 +30,7 @@ async function generateSpriteImage(
 
     console.log(response);
 
-    const spriteResponse = await joinImages({ columns, existingPath: outputFolder, filename })
+    const spriteResponse = await joinImages({ columns, existingPath: outputFolder, spriteOutputFilePath })
 
     console.log(spriteResponse);
 

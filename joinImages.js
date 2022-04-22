@@ -1,7 +1,7 @@
 const joinImages = require('join-images');
 const fs = require('fs-extra');
 
-async function createFullImage({ columns, existingPath, filename }){
+async function createFullImage({ columns, existingPath, spriteOutputFilePath }){
 
   const outputPath = existingPath;
 
@@ -69,7 +69,7 @@ async function createFullImage({ columns, existingPath, filename }){
   // TODO: change location based on filename
 
   // save Sharp instance to file
-  const verticalJoinedImageResponse = await verticalJoinSharpInstance.toFile(`${finalImageDirectory}/verticallyJoined.webp`);
+  const verticalJoinedImageResponse = await verticalJoinSharpInstance.toFile(spriteOutputFilePath);
 
   return 'success'
 }
