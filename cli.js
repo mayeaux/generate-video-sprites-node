@@ -70,4 +70,11 @@ createSpriteWithVTT({
 })
 
 // Example to use:
-// $ node cli.js --input './examples/assets/video.mp4' --outputFolder './examples/assets' --filename video --debug --prependPath '.'
+
+// Without debug
+// $ node cli.js --input './examples/assets/video.mp4' --outputFolder './examples/assets' --filename video
+
+// With debug (logs and processed files)
+// $ node cli.js --input './examples/assets/video.mp4' --outputFolder './examples/assets' --filename video --debug
+
+// cd examples && http-server -c-1

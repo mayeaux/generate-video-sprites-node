@@ -24,3 +24,6 @@ Uses this Python library for generating the sprite from the video: https://githu
 
 
 // ffmpeg -i extrawelt.mp4 -vf fps=1/2 -f image2 -s 140x79 out%d.jpg
+ 
+start server
+cd examples && ../node_modules/http-server/bin/http-server -c-1

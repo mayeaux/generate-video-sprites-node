@@ -19,5 +19,8 @@
     "join-images": "^1.0.0",
     "sharp": "^0.30.1",
     "vtt-creator": "^1.1.1"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.0"
   }
 }
