@@ -181,7 +181,7 @@ async function createSpriteAndThumbnails({
       debug
     })
 
-    console.log(`Sprite image creation: ${response}`)
+    c.l(`Sprite image creation: ${response}`)
 
     const spriteFileSizeInKb = ((await fs.promises.stat(spriteOutputFilePath)).size/1000)
 

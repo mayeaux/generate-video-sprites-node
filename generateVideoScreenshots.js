@@ -4,7 +4,7 @@ const format = 'image2';
 
 async function convertToMostCompatible(
   {
-    path, fps, size, outputFolder
+    path, fps, size, outputFolder, debug
   }
 ){
   return new Promise(function (resolve, reject) {
@@ -13,18 +13,17 @@ async function convertToMostCompatible(
       .format(format)
       .outputOptions(`-s ${size}`)
       .on('start', function (commandLine) {
-        console.log('Spawned Ffmpeg with command: ' + commandLine);
+        c.l('Spawned Ffmpeg with command: ' + commandLine);
       })
       .on('error', function (error) {
         console.log(error);
         return reject(new Error(error))
       })
       .on('progress', function (progress) {
-        console.log(`CONVERTED: ${Math.ceil(progress.percent)}%`);
+        c.l(`CONVERTED: ${Math.ceil(progress.percent)}%`);
       })
       .on('end', async () => {
-
-        console.log('Processing finished !');
+        c.l('Processing finished !');
         resolve('success');
 
       }).save(`${outputFolder}/thumb-%d.png`);

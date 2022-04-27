@@ -103,7 +103,7 @@ async function clipSpriteThumbnail({
 
     let finalHeight;
     if(value === createdArray.length) {
-      console.log('LAST ONE!');
+      c.l('LAST ONE!');
       c.l('dimensons');
       c.l(dimensions.width, dimensions.height)
       const startingHeight =  (startingRow - 1) * imageHeight;
@@ -135,8 +135,6 @@ async function clipSpriteThumbnail({
     }
   }
 
-  console.log('images with rows');
-  console.log(imagesWithRows);
   return imagesWithRows
 
 }
