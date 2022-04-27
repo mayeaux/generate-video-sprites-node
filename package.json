@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "cd examples && ../node_modules/http-server/bin/http-server -c-1",
+    "example": "node cli.js --input './examples/assets/video.mp4' --outputFolder './examples/assets' --filename video --debug"
   },
   "author": "",
   "license": "ISC",
