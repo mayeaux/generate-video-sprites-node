@@ -2,7 +2,7 @@
 // https://github.com/sampotts/plyr/#options
 const player = new Plyr('video', {
 
-  controls: ['play-large', 'play', 'progress', 'current-time', 'duration'],
+  controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'volume'],
 
   previewThumbnails: {
     enabled: true,

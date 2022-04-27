@@ -10,6 +10,7 @@
   "license": "ISC",
   "repository": "git://github.com/mayeaux/generate-video-sprites-node.git",
   "dependencies": {
+    "commander": "^9.2.0",
     "ffprobe": "^1.1.2",
     "ffprobe-static": "^3.0.0",
     "fluent-ffmpeg": "^2.1.2",
