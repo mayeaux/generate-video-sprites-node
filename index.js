@@ -176,8 +176,9 @@ async function createSpriteAndThumbnails({
       videoPath: inputFilePath,
       screenshotIntervalInSeconds: intervalInSecondsAsInteger,
       sizeAsWidthxHeight,
-      outputFolder: './output11',
-      spriteOutputFilePath
+      outputFolder: `${outputFileDirectory}/processing`,
+      spriteOutputFilePath,
+      debug
     })
 
     console.log(`Sprite image creation: ${response}`)

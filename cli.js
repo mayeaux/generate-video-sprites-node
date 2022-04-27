@@ -9,7 +9,7 @@ program
   .option('--outputFolder <type>', 'Path to the folder where the thumbnail sprite/s and vtt will be saved')
   .option('--filename <type>', 'Name of the output files, by default it will be ${filename}_sprite.webp and ${filename}_sprite.vtt')
   .option('--interval <type>', 'Integer representing the interval in seconds between screenshots (aka 2 is once every 2 seconds)', '2')
-  .option('--prependPath <type>', 'Used in the webvtt to build paths to where the sprite thumbnail/s will be served')
+  .option('--prependPath <type>', 'Used in the webvtt to build paths to where the sprite thumbnail/s will be served', '.')
   .option('--thumbnailSize <type>', 'Instead of setting height/width (px), set the longest side and an algorithm will calculate the other', '140')
   .option('--targetSize <type>', 'Targeted maximum size when splitting the sprite image, in kb', '80')
   .option('--columns <type>', 'I don\'t know what difference it makes but you can change it', '9')
@@ -54,19 +54,20 @@ if(debug){
   console.log(`columns: ${columns}`)
 }
 
-// createSpriteWithVTT({
-//   inputFilePath,
-//   filename,
-//   spriteFileName,
-//   spriteOutputFilePath,
-//   webVTTOutputFilePath,
-//   prependPath,
-//   intervalInSecondsAsInteger,
-//   columns,
-//   thumbnailLongestSide,
-//   targetSizeInKb,
-//   debug,
-//   outputFolder
-// })
+createSpriteWithVTT({
+  inputFilePath,
+  filename,
+  spriteFileName,
+  spriteOutputFilePath,
+  webVTTOutputFilePath,
+  prependPath,
+  intervalInSecondsAsInteger,
+  columns,
+  thumbnailLongestSide,
+  targetSizeInKb,
+  debug,
+  outputFileDirectory: outputFolder
+})
 
-// Example to use: $ node cli.js --input './examples/assets/video.mp4' --outputFolder './assets' --filename example --debug --prependPath '.'
+// Example to use:
+// $ node cli.js --input './examples/assets/video.mp4' --outputFolder './examples/assets' --filename video --debug --prependPath '.'

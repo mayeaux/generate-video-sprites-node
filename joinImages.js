@@ -1,10 +1,12 @@
 const joinImages = require('join-images');
 const fs = require('fs-extra');
 
-async function createFullImage({ columns, existingPath, spriteOutputFilePath }){
-
-  const outputPath = existingPath;
-
+async function createFullImage({
+   columns,
+   outputPath,
+   spriteOutputFilePath,
+   debug
+}){
   const screenshotImagesDirectory = `${outputPath}/screenshotImages`;
   const horizontalImagesDirectory = `${outputPath}/horizontalImages`;
   const finalImageDirectory = `${outputPath}/finalImage`;
@@ -70,6 +72,10 @@ async function createFullImage({ columns, existingPath, spriteOutputFilePath }){
 
   // save Sharp instance to file
   const verticalJoinedImageResponse = await verticalJoinSharpInstance.toFile(spriteOutputFilePath);
+
+  if(!debug){
+    fs.removeSync(outputPath)
+  }
 
   return 'success'
 }
