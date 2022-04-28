@@ -1,11 +1,13 @@
 const ffprobe = require('ffprobe');
 const Vtt = require('vtt-creator');
 const fs = require('fs');
-ffprobeStatic = require('ffprobe-static');
 const clipThumbnail = require('./clip');
 const sizeOf = require('image-size')
 const createSpriteImage = require('./createSpriteImage');
+const which = require('which')
 require('./logging');
+
+const ffprobePath = which.sync('ffprobe')
 
 function getImageNumberFromRow(mappingArray, row){
   // loop through all the thumbnail items in the array
@@ -127,10 +129,10 @@ async function createSpriteAndThumbnails({
       };
     }
 
-    const ffprobe1 = await ffprobe(inputFilePath, { path: ffprobeStatic.path });
+    const ffprobeResponse = await ffprobe(inputFilePath, { path: ffprobePath });
 
     let videoStream;
-    for(const stream of ffprobe1.streams){
+    for(const stream of ffprobeResponse.streams){
       if(stream.codec_type === 'video'){
         videoStream = stream
       }
