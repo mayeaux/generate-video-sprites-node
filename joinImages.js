@@ -68,9 +68,8 @@ async function createFullImage({
   // create Sharp instance
   const verticalJoinSharpInstance = await joinImages.joinImages(arrays, { direction: 'vertical'})
 
-  // TODO: change location based on filename
-
   // save Sharp instance to file
+  // TODO: have to change this here (to clear sprite image)
   const verticalJoinedImageResponse = await verticalJoinSharpInstance.toFile(spriteOutputFilePath);
 
   if(!debug){
