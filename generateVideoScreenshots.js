@@ -9,8 +9,8 @@ async function convertToMostCompatible(
 ){
   return new Promise(function (resolve, reject) {
     ffmpeg(path)
-      .fps(fps)
-      .format(format)
+      .outputOptions(`-vf`)
+      .outputOptions(`fps=${fps}`)
       .outputOptions(`-s ${size}`)
       .on('start', function (commandLine) {
         c.l('Spawned Ffmpeg with command: ' + commandLine);
