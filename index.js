@@ -1,5 +1,4 @@
 const ffprobe = require('ffprobe');
-const Vtt = require('vtt-creator');
 const fs = require('fs');
 ffprobeStatic = require('ffprobe-static');
 const clipThumbnail = require('./clip');
