@@ -1,5 +1,5 @@
-const Vtt = require("vtt-creator");
 const fs = require("fs");
+const webvtt = require("node-webvtt");
 
 function getImageNumberFromRow(mappingArray, row){
   // loop through all the thumbnail items in the array
@@ -46,7 +46,6 @@ function createVTT({
   intervalInSecondsAsInteger,
   mappingArray
 }){
-  const v = new Vtt();
 
   c.l('mapping array')
   c.l(mappingArray);
@@ -56,6 +55,8 @@ function createVTT({
   const createdArray = Array.from({length: (videoDurationInSeconds/intervalInSecondsAsInteger)}, (_, i) => i + 1)
 
   c.l(createdArray.length);
+
+  let cues = [];
 
   // loop through the array of thumbnails
   for(const thumbnailNumber of createdArray){
@@ -80,12 +81,32 @@ function createVTT({
 
     const filePathToUse = `${filename}-${imageNumber}`
 
+    const startingNumber = (thumbnailNumber * intervalInSecondsAsInteger) - intervalInSecondsAsInteger;
+    const endingNumber = thumbnailNumber * intervalInSecondsAsInteger;
+    const text = `${prependPath}/${filePathToUse}.webp#xywh=${xValue},${yValue},${width},${height}`
+
+    let lineObject = {
+      start: startingNumber,
+      end: endingNumber,
+      text,
+      // not used
+      identifier: '',
+      styles: ''
+    }
+
     // add line to webvtt file (why thumbnailNumber -1 as first param?)
     // starts as 0 because that's the first second (0 seconds)
-    v.add((thumbnailNumber * intervalInSecondsAsInteger) - intervalInSecondsAsInteger, thumbnailNumber * intervalInSecondsAsInteger,`${prependPath}/${filePathToUse}.webp#xywh=${xValue},${yValue},${width},${height}`);
+    cues.push(lineObject);
   }
 
-  fs.writeFileSync(outputFile, v.toString());
+  const input = {
+    cues,
+    valid: true
+  };
+
+  const compiledWebVTT = webvtt.compile(input);
+
+  fs.writeFileSync(outputFile, compiledWebVTT);
 
   return 'completed'
 
