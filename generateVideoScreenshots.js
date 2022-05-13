@@ -1,10 +1,16 @@
 const ffmpeg = require('fluent-ffmpeg');
 
-const format = 'image2';
-
-async function convertToMostCompatible(
+/**
+ *
+ * @param path
+ * @param fps
+ * @param size
+ * @param outputFolder
+ * @returns {Promise<unknown>}
+ */
+async function generateVideoScreenshots(
   {
-    path, fps, size, outputFolder, debug
+    path, fps, size, outputFolder
   }
 ){
   return new Promise(function (resolve, reject) {
@@ -30,6 +36,4 @@ async function convertToMostCompatible(
   })
 }
 
-module.exports = convertToMostCompatible;
-
-// convertToMostCompatible()
+module.exports = generateVideoScreenshots;

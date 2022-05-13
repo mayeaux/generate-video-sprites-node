@@ -14,6 +14,9 @@ async function createFullImage({
   fs.mkdirSync(horizontalImagesDirectory, { recursive: true });
   fs.mkdirSync(finalImageDirectory, { recursive: true });
 
+  fs.emptyDirSync(horizontalImagesDirectory)
+  fs.emptyDirSync(finalImageDirectory)
+
   // how many screenshot images there are in total
   let amountOfFiles = fs.readdirSync(screenshotImagesDirectory)
                       .filter( function( elm ) {return elm.match(/.*\.(png?)/ig);})
@@ -22,15 +25,25 @@ async function createFullImage({
   // calculate the total amount of rows
   const rows = Math.ceil(amountOfFiles / columns);
 
+  c.l('amount of files, columns, rows')
+  c.l(amountOfFiles, columns, rows)
+
   // create array for
   function createArray(columns, startingAmount){
     // the image number to start it at
     const realStartingAmount = columns * (startingAmount - 1);
 
+    c.l('real starting amount', realStartingAmount)
+    c.l('columns', columns)
+
+    // +1 because we're starting at 1
+    const amountOfThingsToLoopThrough = columns + 1;
+    c.l('amount of things', amountOfThingsToLoopThrough)
+
     // create array for a horizontal join
     const fileNameArray = [];
     // the amount of images equals the amount of columns
-    for(let x = 1 ; x < columns + 1; x++){
+    for(let x = 1 ; x < amountOfThingsToLoopThrough; x++){
       const imageNumber = realStartingAmount + x;
       // this conditional bugfixes where there would be one extra, I believe
       if(imageNumber <= amountOfFiles){
@@ -46,6 +59,8 @@ async function createFullImage({
 
     // create array with the amount of images being the columns
     const array = createArray(columns, x);
+
+    c.l(array);
 
     // create Sharp instance
     const sharpHorizontalInstance = await joinImages.joinImages(array, { direction: 'horizontal'});
@@ -72,6 +87,9 @@ async function createFullImage({
   // TODO: have to change this here (to clear sprite image)
   const verticalJoinedImageResponse = await verticalJoinSharpInstance.toFile(spriteOutputFilePath);
 
+  fs.copy(spriteOutputFilePath, `${finalImageDirectory}/video_sprite.webp`)
+
+  // delete processing folder
   if(!debug){
     fs.removeSync(outputPath)
   }
