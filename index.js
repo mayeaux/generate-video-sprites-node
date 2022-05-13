@@ -59,11 +59,8 @@ async function createSpriteAndThumbnails({
     }
 
     const multiply = thumbnailLongestSide / aspectRatio;
-    c.l('aspect ratio');
-    c.l(aspectRatio);
-
-    c.l('multiply');
-    c.l(multiply);
+    c.l(`aspect ratio: ${aspectRatio}`);
+    c.l(`multiply: ${multiply}`);
 
     let imageWidth = aspectRatio * multiply
     let imageHeight = imageWidth / aspectRatio;
@@ -72,8 +69,7 @@ async function createSpriteAndThumbnails({
       imageWidth = imageHeight / aspectRatio;
     }
 
-    c.l('image height, image width');
-    c.l(imageHeight, imageWidth);
+    c.l(`image height: ${imageHeight}, image width: ${imageWidth}`);
 
     widthInPixels = Math.round(imageWidth);
     heightInPixels = Math.round(imageHeight);
@@ -101,19 +97,15 @@ async function createSpriteAndThumbnails({
     const spriteFileSizeInKb = ((await fs.promises.stat(spriteOutputFilePath)).size/1000)
 
     const amountOfThumbnails = Math.ceil(videoDurationInSeconds / intervalInSecondsAsInteger);
-    c.l('amount of thumbnails');
-    c.l(amountOfThumbnails);
+    c.l(`amount of thumbnails: ${amountOfThumbnails}`);
 
-    c.l('amount of columns');
-    c.l(columns)
+    c.l(`amount of columns: ${columns}`);
 
     const dimensions = sizeOf(spriteOutputFilePath);
-    c.l('Image size:')
-    c.l(dimensions)
+    c.l(`Image size: ${dimensions}`)
 
     const amountOfRows = dimensions.height / heightInPixels
-    c.l('amount of rows');
-    c.l(amountOfRows);
+    c.l(`amount of rows: ${amountOfRows}`);
 
     /** clip thumbnails into smaller chunks **/
     const mappingArray = await clipThumbnail({

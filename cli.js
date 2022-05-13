@@ -61,10 +61,10 @@ createSpriteWithVTT({
   spriteOutputFilePath,
   webVTTOutputFilePath,
   prependPath,
-  intervalInSecondsAsInteger,
-  columns,
-  thumbnailLongestSide,
-  targetSizeInKb,
+  intervalInSecondsAsInteger: Number(intervalInSecondsAsInteger),
+  columns: Number(columns),
+  thumbnailLongestSide: Number(thumbnailLongestSide),
+  targetSizeInKb: Number(targetSizeInKb),
   debug,
   outputFileDirectory: outputFolder
 })
