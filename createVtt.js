@@ -24,7 +24,6 @@ function getImageNumberFromRow(mappingArray, row){
  * @param height
  * @param width
  * @param columns
- * @param spriteOutputFilePath
  * @param outputFile
  * @param prependPath
  * @param filename
@@ -38,7 +37,6 @@ function createVTT({
   height,
   width,
   columns,
-  spriteOutputFilePath,
   outputFile,
   prependPath,
   filename,

@@ -1,5 +1,5 @@
 const ffprobe = require('ffprobe');
-const fs = require('fs');
+const fs = require('fs-extra');
 ffprobeStatic = require('ffprobe-static');
 const clipThumbnail = require('./clip');
 const sizeOf = require('image-size')
@@ -120,6 +120,8 @@ async function createSpriteAndThumbnails({
       debug,
       outputFolder: outputFileDirectory
     })
+
+    fs.remove(spriteOutputFilePath);
 
     /** create vtt file with mappings **/
       // this is sync so doesn't need to be awaited
