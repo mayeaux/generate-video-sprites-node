@@ -18,8 +18,8 @@
     "fs-extra": "^10.1.0",
     "image-size": "^1.0.1",
     "join-images": "^1.0.0",
+    "node-webvtt": "^1.9.3",
     "sharp": "^0.30.1",
-    "vtt-creator": "^1.1.1",
     "which": "^2.0.2"
   },
   "devDependencies": {

@@ -22,6 +22,7 @@ async function generateSpriteImage(
     const screenshotImagesFolder = `${outputFolder}/screenshotImages`;
     fs.mkdirSync(screenshotImagesFolder, { recursive: true });
 
+    // use ffmpeg to take all the screenshot images
     const response = await generateVideoScreenshots({
       path: videoPath,
       fps: (1 / screenshotIntervalInSeconds),
@@ -32,6 +33,7 @@ async function generateSpriteImage(
 
     c.l(response);
 
+    // do a horizontal and then vertical join
     const spriteResponse = await joinImages({
       columns,
       outputPath: outputFolder,
