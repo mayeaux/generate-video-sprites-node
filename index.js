@@ -143,6 +143,7 @@ async function createSpriteAndThumbnails({
 
   } catch (err){
     c.l(err);
+    throw new Error(err);
   }
 }
 
