@@ -104,13 +104,15 @@ async function clipSpriteThumbnail({
     }
 
     const webvttObject = {
-      currentStartingRow,
-      finishingRow: currentStartingRow + amountOfRows,
+      startingRow: currentStartingRow,
+      finishingRow: currentStartingRow + (amountOfRows - 1), // if you do only 1 row you finish same row
       imageNumber: realIndex,
-      amountOfRowsPerSplit: amountOfRows
+      amountOfRows
     }
 
     imagesWithRows.push(webvttObject);
+
+    currentStartingRow = currentStartingRow + amountOfRows
   }
 
   console.log('running here!');
