@@ -89,13 +89,18 @@ async function clipSpriteThumbnail({
     const realIndex = index + 1;
     // console.log(realIndex , amountOfRows)
 
+    const widthToUse = groups.length === 1 ? dimensions.width : totalWidth;
+
     // create image
     const splitObject = {
       left: 0, // always starting in left
       top: ( currentStartingRow - 1) * imageHeight,
-      width: totalWidth, // always the full width of the image
+      width: widthToUse, // always the full width of the image
       height: amountOfRows * imageHeight,
     }
+
+    c.l('split object');
+    console.log(splitObject)
 
     if(extract){
       await image
