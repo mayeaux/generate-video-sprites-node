@@ -7,17 +7,24 @@ const createSpriteImage = require('./createSpriteImage');
 const createVTT = require('./createVtt');
 require('./logging');
 
-// /**
-//  * Main exported function that is used to compile the sprite/webvtt
-//  * @param inputFilePath - path to the video to have sprites/webvtt created from
-//  * @param intervalInSecondsAsInteger
-//  * @param widthInPixels
-//  * @param heightInPixels
-//  * @param columns
-//  * @param spriteOutputFilePath
-//  * @param webVTTOutputFilePath
-//  * @returns {Promise<void>}
-//  */
+/**
+ * Main exported function that is used to compile the sprite/webvtt
+ * @param inputFilePath
+ * @param intervalInSecondsAsInteger
+ * @param widthInPixels
+ * @param heightInPixels
+ * @param columns
+ * @param spriteOutputFilePath
+ * @param webVTTOutputFilePath
+ * @param prependPath
+ * @param filename
+ * @param spriteFileName
+ * @param debug
+ * @param thumbnailLongestSide
+ * @param targetSizeInKb
+ * @param outputFileDirectory
+ * @returns {Promise<void>}
+ */
 async function createSpriteAndThumbnails({
   inputFilePath,
   intervalInSecondsAsInteger,
@@ -92,7 +99,9 @@ async function createSpriteAndThumbnails({
       debug
     })
 
-    c.l(`Sprite image creation: ${response}`)
+    c.l(`Sprite image creation: ${response.status}`)
+
+    // const { finalOutputPath } = response;
 
     const spriteFileSizeInKb = ((await fs.promises.stat(spriteOutputFilePath)).size/1000)
 

@@ -43,29 +43,31 @@ async function clipSpriteThumbnail({
   // no need to compress
   // if(targetFileSize > totalFileSize) return
 
-  // rough estimate of how many times to split by total size divided by target
-  // TODO: this is named wrong, should be how many images
-  let howManySplits;
-  howManySplits = Math.floor(totalFileSize/targetFileSize);
+  // rough estimate of how many images are needed with total size / target
+  let howManyImages;
 
-  if(howManySplits == 0) howManySplits = 1;
+  // this is actually a bug, it should be Math.round
+  // I will keep it though because it ends up being accurate after the webp files are clipped
+  // (there is a tendency for the smaller parts to be less than the sum of the whole)
+  howManyImages = Math.floor(totalFileSize/targetFileSize);
 
+  if(howManyImages == 0) howManyImages = 1;
 
-  c.l('rows, howManySplits')
-  c.l(rows, howManySplits);
+  c.l('rows, howManyImages')
+  c.l(rows, howManyImages);
 
   // how many rows that should happen per file
-  const amountOfRowsPerSplit = Math.floor(rows/howManySplits);
+  const amountOfRowsPerSplit = Math.floor(rows/howManyImages);
 
-  c.l('amountOfRowsPerImage rows/howManySplits');
+  c.l('amountOfRowsPerImage rows/howManyImages');
   c.l(amountOfRowsPerSplit);
 
-  const remainder = rows - (amountOfRowsPerSplit * howManySplits)
+  const remainder = rows - (amountOfRowsPerSplit * howManyImages)
   c.l('remainder');
   c.l(remainder);
 
   // create an array for each split
-  const createdArray = Array.from({length: (howManySplits)}, (_, i) => i + 1)
+  const createdArray = Array.from({length: (howManyImages)}, (_, i) => i + 1)
 
   c.l('createdArray for looping')
   c.l(createdArray)

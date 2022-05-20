@@ -38,7 +38,7 @@ async function generateSpriteImage(
 
     c.l(spriteResponse);
 
-    return 'success'
+    return spriteResponse
   } catch (err){
     console.log(err)
   }
