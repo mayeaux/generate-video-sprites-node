@@ -1,6 +1,24 @@
 const sharp = require("sharp");
 const sizeOf = require('image-size')
 
+let distributeInteger = function* (total, divider) {
+  if (divider === 0) {
+    yield 0
+  } else {
+    let rest = total % divider
+    let result = total / divider
+
+    for (let i = 0; i < divider; i++) {
+      if (rest-- >0) {
+        yield Math.ceil(result)
+      } else {
+        yield Math.floor(result)
+      }
+    }
+  }
+}
+
+
 async function clipSpriteThumbnail({
    fullThumbnailPath,
    rows,
@@ -35,9 +53,11 @@ async function clipSpriteThumbnail({
   c.l('Calculated width:')
   c.l(totalWidth);
 
+  // used for creating the webvtt
   const imagesWithRows = [];
 
   // no need to compress
+  // cant skip because this is also used for webvtt
   // if(targetFileSize > totalFileSize) return
 
   const webpFileSizeEquivalent = Math.round(totalFileSize - (totalFileSize * 0.3));
@@ -55,92 +75,46 @@ async function clipSpriteThumbnail({
 
   if(howManyImages == 0) howManyImages = 1;
 
-  c.l('rows, howManyImages')
-  c.l(rows, howManyImages);
+  let groups = []
+  for (let member of distributeInteger(rows, howManyImages)) {
+    groups.push(member)
+  }
 
-  // how many rows that should happen per file
-  const amountOfRowsPerSplit = Math.floor(rows/howManyImages);
+  c.l('groups')
+  c.l(groups);
 
-  c.l('amountOfRowsPerImage rows/howManyImages');
-  c.l(amountOfRowsPerSplit);
+  // start current starting row at 1
+  let currentStartingRow = 1;
+  for (const [index, amountOfRows] of groups.entries()) {
+    const realIndex = index + 1;
+    // console.log(realIndex , amountOfRows)
 
-  const remainder = rows - (amountOfRowsPerSplit * howManyImages)
-  c.l('remainder');
-  c.l(remainder);
-
-  // create an array for each split
-  const createdArray = Array.from({length: (howManyImages)}, (_, i) => i + 1)
-
-  c.l('createdArray for looping')
-  c.l(createdArray)
-  for(const [index, value] of createdArray.entries()){
-    c.l('value');
-    c.l(value);
-
-    // how many rows per image (remainder will be added)
-    let amountOfRowsToHit = amountOfRowsPerSplit;
-
-    c.l('rows, # of rows to hit')
-    c.l(rows, amountOfRowsToHit);
-
-    // really should be renamed 'starting row'
-    const topPosition = (value - 1) * amountOfRowsToHit
-
-    c.l('starting row');
-    const startingRow = topPosition + 1
-    c.l(startingRow)
-
-    // add remainder to final clip
-    if(value == createdArray.length){
-      amountOfRowsToHit = amountOfRowsToHit + remainder
-    }
-
-    c.l('finishing row');
-    const finishingRow = topPosition + amountOfRowsToHit
-    c.l(finishingRow);
-
-    const thingObject = {
-      startingRow, finishingRow, imageNumber: value, amountOfRowsPerSplit
-    }
-
-    imagesWithRows.push(thingObject);
-
-    let finalHeight;
-    if(value === createdArray.length) {
-      c.l('LAST ONE!');
-      c.l('dimensons');
-      c.l(dimensions.width, dimensions.height)
-      const startingHeight =  (startingRow - 1) * imageHeight;
-      c.l('starting height');
-      c.l(startingHeight)
-      finalHeight = dimensions.height - startingHeight;
-      c.l('final height');
-      c.l(finalHeight)
-    }
-
-    // load details
+    // create image
     const splitObject = {
-      left: 0,
-      top: topPosition * imageHeight,
-      width: totalWidth,
-      height: finalHeight || amountOfRowsToHit * imageHeight,
+      left: 0, // always starting in left
+      top: ( currentStartingRow - 1) * imageHeight,
+      width: totalWidth, // always the full width of the image
+      height: amountOfRows * imageHeight,
     }
 
-    c.l('split object')
-    c.l(splitObject)
-
-    // return response
-    // create split
     if(extract){
       await image
         .extract(splitObject)
-        .toFile(`${outputFolder}/${filename}-${value}.webp`)
-
+        .toFile(`${outputFolder}/${filename}-${realIndex}.webp`)
     }
+
+    const webvttObject = {
+      currentStartingRow,
+      finishingRow: currentStartingRow + amountOfRows,
+      imageNumber: realIndex,
+      amountOfRowsPerSplit: amountOfRows
+    }
+
+    imagesWithRows.push(webvttObject);
   }
 
+  console.log('running here!');
   return imagesWithRows
-
 }
 
 module.exports = clipSpriteThumbnail
