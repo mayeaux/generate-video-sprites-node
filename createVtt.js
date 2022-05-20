@@ -4,10 +4,10 @@ const webvtt = require("node-webvtt");
 function getImageNumberFromRow(mappingArray, row){
   // loop through all the thumbnail items in the array
   for(const imageItem of mappingArray) {
-    // c.l('image item');
-    // c.l(imageItem)
+
     const { startingRow, finishingRow, imageNumber, amountOfRows } = imageItem
 
+    // get the matching information for that row
     if(row >= startingRow && row <= finishingRow){
       return {
         imageNumber,
@@ -15,8 +15,6 @@ function getImageNumberFromRow(mappingArray, row){
         startingRow,
         finishingRow
       }
-    } else {
-      // c.l(startingRow, finishingRow, row, imageNumber, amountOfRowsPerSplit)
     }
   }
 }
@@ -79,16 +77,19 @@ function createVTT({
 
     c.l(imageNumber, amountOfRowsPerSplit)
 
-    const adjustedRow = finishingRow - startingRow;
-    
-    const yValue = adjustedRow * height
+    // how many pixels to move downwards
+    const yValue = (finishingRow - startingRow) * height
 
     c.l(yValue);
 
     const filePathToUse = `${filename}-${imageNumber}`
 
+    // starting seconds number
     const startingNumber = (thumbnailNumber * intervalInSecondsAsInteger) - intervalInSecondsAsInteger;
+    // ending seconds number
     const endingNumber = thumbnailNumber * intervalInSecondsAsInteger;
+
+    // where to point to on the image
     const text = `${prependPath}/${filePathToUse}.webp#xywh=${xValue},${yValue},${width},${height}`
 
     let lineObject = {
