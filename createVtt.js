@@ -4,16 +4,17 @@ const webvtt = require("node-webvtt");
 function getImageNumberFromRow(mappingArray, row){
   // loop through all the thumbnail items in the array
   for(const imageItem of mappingArray) {
-    //
-    const { startingRow, finishingRow, imageNumber, amountOfRowsPerSplit } = imageItem
 
+    const { startingRow, finishingRow, imageNumber, amountOfRows } = imageItem
+
+    // get the matching information for that row
     if(row >= startingRow && row <= finishingRow){
       return {
         imageNumber,
-        amountOfRowsPerSplit
+        amountOfRowsPerSplit: amountOfRows,
+        startingRow,
+        finishingRow
       }
-    } else {
-      // c.l(startingRow, finishingRow, row, imageNumber, amountOfRowsPerSplit)
     }
   }
 }
@@ -50,7 +51,7 @@ function createVTT({
 
   // this actually maps to 'amount of thumbnails'
   // create an array from 1 to the duration in seconds (ie 30)
-  const createdArray = Array.from({length: (videoDurationInSeconds/intervalInSecondsAsInteger)}, (_, i) => i + 1)
+  const createdArray = Array.from({ length: (videoDurationInSeconds/intervalInSecondsAsInteger)}, (_, i) => i + 1)
 
   c.l(createdArray.length);
 
@@ -68,19 +69,27 @@ function createVTT({
     // x value is the column number times the width, but then move over one full column width to start at the left
     const xValue = ( column * width ) - width
 
+    c.l('row')
     c.l(row);
 
     // based on which row is passed, know which image to point towards
-    const { imageNumber, amountOfRowsPerSplit }  = getImageNumberFromRow(mappingArray, row);
+    const { startingRow, finishingRow, imageNumber, amountOfRowsPerSplit }  = getImageNumberFromRow(mappingArray, row);
 
-    const adjustedRow = row - (( imageNumber - 1 ) * amountOfRowsPerSplit)
+    c.l(imageNumber, amountOfRowsPerSplit)
 
-    const yValue = (adjustedRow * height ) - height
+    // how many pixels to move downwards
+    const yValue = (finishingRow - startingRow) * height
+
+    c.l(yValue);
 
     const filePathToUse = `${filename}-${imageNumber}`
 
+    // starting seconds number
     const startingNumber = (thumbnailNumber * intervalInSecondsAsInteger) - intervalInSecondsAsInteger;
+    // ending seconds number
     const endingNumber = thumbnailNumber * intervalInSecondsAsInteger;
+
+    // where to point to on the image
     const text = `${prependPath}/${filePathToUse}.webp#xywh=${xValue},${yValue},${width},${height}`
 
     let lineObject = {
