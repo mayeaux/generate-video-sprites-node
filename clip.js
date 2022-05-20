@@ -37,11 +37,13 @@ async function clipSpriteThumbnail({
 
   const imagesWithRows = [];
 
-  c.l('totalFileSize, targetFileSize');
-  c.l(totalFileSize, targetFileSize)
-
   // no need to compress
   // if(targetFileSize > totalFileSize) return
+
+  const webpFileSizeEquivalent = Math.round(totalFileSize - (totalFileSize * 0.3));
+
+  c.l('totalFileSize, targetFileSize, webpFileSizeEquivalent');
+  c.l(totalFileSize, targetFileSize, webpFileSizeEquivalent);
 
   // rough estimate of how many images are needed with total size / target
   let howManyImages;
@@ -49,7 +51,7 @@ async function clipSpriteThumbnail({
   // this is actually a bug, it should be Math.round
   // I will keep it though because it ends up being accurate after the webp files are clipped
   // (there is a tendency for the smaller parts to be less than the sum of the whole)
-  howManyImages = Math.floor(totalFileSize/targetFileSize);
+  howManyImages = Math.round(webpFileSizeEquivalent/targetFileSize);
 
   if(howManyImages == 0) howManyImages = 1;
 
