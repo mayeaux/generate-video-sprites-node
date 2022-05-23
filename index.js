@@ -89,7 +89,7 @@ async function createSpriteAndThumbnails({
 
     c.l(videoDurationInSeconds);
 
-    const response = await createSpriteImage({
+    const averageRowSizeInKb = await createSpriteImage({
       columns,
       videoPath: inputFilePath,
       screenshotIntervalInSeconds: intervalInSecondsAsInteger,
@@ -99,35 +99,44 @@ async function createSpriteAndThumbnails({
       debug
     })
 
-    c.l(`Sprite image creation: ${response.status}`)
+    c.l(`Sprite image creation: ${averageRowSizeInKb}`)
 
     // const { finalOutputPath } = response;
 
-    const spriteFileSizeInKb = ((await fs.promises.stat(spriteOutputFilePath)).size/1000)
+    // const spriteFileSizeInKb = ((await fs.promises.stat(spriteOutputFilePath)).size/1000)
+    //
+    // const amountOfThumbnails = Math.ceil(videoDurationInSeconds / intervalInSecondsAsInteger);
+    // c.l(`amount of thumbnails: ${amountOfThumbnails}`);
+    //
+    // c.l(`amount of columns: ${columns}`);
+    //
+    // const dimensions = sizeOf(spriteOutputFilePath);
+    // c.l(`Image size: ${dimensions}`)
+    //
+    // const amountOfRows = dimensions.height / heightInPixels
+    // c.l(`amount of rows: ${amountOfRows}`);
 
-    const amountOfThumbnails = Math.ceil(videoDurationInSeconds / intervalInSecondsAsInteger);
-    c.l(`amount of thumbnails: ${amountOfThumbnails}`);
+    const horizontalImagesDirectory = `${outputFileDirectory}/processing/horizontalImages`;
 
-    c.l(`amount of columns: ${columns}`);
+    let amountOfFiles = fs.readdirSync(horizontalImagesDirectory)
+      .filter( function( elm ) {return elm.match(/.*\.(webp?)/ig);})
+      .length;
 
-    const dimensions = sizeOf(spriteOutputFilePath);
-    c.l(`Image size: ${dimensions}`)
-
-    const amountOfRows = dimensions.height / heightInPixels
-    c.l(`amount of rows: ${amountOfRows}`);
 
     /** clip thumbnails into smaller chunks **/
     const mappingArray = await clipThumbnail({
       columns,
-      rows: amountOfRows,
+      rows: amountOfFiles, // todo: get this dynmically
       fullThumbnailPath: spriteOutputFilePath,
       imageWidth: widthInPixels,
       imageHeight: heightInPixels,
-      totalFileSize: spriteFileSizeInKb,
+      // totalFileSize: spriteFileSizeInKb,
       targetFileSize: targetSizeInKb,
       filename,
       debug,
-      outputFolder: outputFileDirectory
+      outputFolder: outputFileDirectory,
+      averageRowSizeInKb,
+      outputFileDirectory
     })
 
     if(!debug){

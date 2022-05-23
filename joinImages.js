@@ -66,13 +66,36 @@ async function createFullImage({
     const sharpHorizontalInstance = await joinImages.joinImages(array, { direction: 'horizontal'});
 
     // save Sharp instance to file
-    const horizontalImageResponse = await sharpHorizontalInstance.toFile(`${horizontalImagesDirectory}/${x}.jpg`);
+    const horizontalImageResponse = await sharpHorizontalInstance.toFile(`${horizontalImagesDirectory}/${x}.webp`);
   }
 
   // count how many horizontal images were created
-  let amountOfHorizontalImages = fs.readdirSync(horizontalImagesDirectory)
-    .filter( function( elm ) {return elm.match(/.*\.(jpg?)/ig);})
-    .length;
+  let horizontalImages = fs.readdirSync(horizontalImagesDirectory)
+    .filter( function( elm ) {return elm.match(/.*\.(webp?)/ig);})
+
+  let arrayOfRowSizes = [];
+
+  for(const image of horizontalImages){
+    const horizontalFile = `${horizontalImagesDirectory}/${image}`;
+    var stats = fs.statSync(horizontalFile)
+    var fileSizeInBytes = stats.size;
+    var fileSizeInKb = Math.round(fileSizeInBytes / (1024));
+    arrayOfRowSizes.push(fileSizeInKb)
+    console.log(fileSizeInKb)
+  }
+
+  const average = arr => arr.reduce( ( p, c ) => p + c, 0 ) / arr.length;
+
+  const averageKbSize = Math.round(average(arrayOfRowSizes));
+
+  console.log('average kb size');
+  console.log(averageKbSize)
+
+  // console.log(amountOfHorizontalImages);
+
+  return averageKbSize
+
+    // .length;
 
   // create array of horizontal images to join vertically
   let arrays = [];
@@ -91,6 +114,7 @@ async function createFullImage({
 
 
   // TODO: refactor this so that it's smart enough to use the image from processing
+  // TODO: right now this is saving a webp as a jpeg
   await fs.copy(finalOutputPath, spriteOutputFilePath)
 
   // delete processing folder
