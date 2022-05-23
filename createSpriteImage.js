@@ -14,7 +14,11 @@ async function generateSpriteImage(
   }){
   try {
     const screenshotImagesFolder = `${outputFolder}/screenshotImages`;
+
+    // make screenshot folder if it doesn't exist
     fs.mkdirSync(screenshotImagesFolder, { recursive: true });
+
+    // empty old folder and generate screenshots
     fs.emptyDirSync(screenshotImagesFolder)
 
     // use ffmpeg to take all the screenshot images

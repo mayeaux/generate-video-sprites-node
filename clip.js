@@ -32,17 +32,9 @@ function range(start, end) {
 
 
 async function clipSpriteThumbnail({
-   fullThumbnailPath,
    rows,
-   columns,
-   imageWidth,
-   imageHeight,
-   totalFileSize,
    targetFileSize,
-   filename,
-   extract = true,
    debug = false,
-   outputFolder,
    averageRowSizeInKb,
    outputFileDirectory
 }){
@@ -53,44 +45,13 @@ async function clipSpriteThumbnail({
     }
   }
 
-  // load sharp
-  // const image = sharp(fullThumbnailPath);
-  // c.l('image width, image height');
-  // c.l(imageWidth, imageHeight);
-  //
-  // const dimensions = sizeOf(fullThumbnailPath);
-  // c.l('Image size:')
-  // c.l(dimensions)
-  //
-  // // width of thumbnail is column times image width
-  const totalWidth = columns * imageWidth;
-  // c.l('Calculated width:')
-  // c.l(totalWidth);
-  //
   // used for creating the webvtt
   const imagesWithRows = [];
-  //
-  // // no need to compress
-  // // cant skip because this is also used for webvtt
-  // // if(targetFileSize > totalFileSize) return
-  //
-  // const webpFileSizeEquivalent = Math.round(totalFileSize - (totalFileSize * 0.3));
-  //
-  // c.l('totalFileSize, targetFileSize, webpFileSizeEquivalent');
-  // c.l(totalFileSize, targetFileSize, webpFileSizeEquivalent);
-
-  // rough estimate of how many images are needed with total size / target
-  // let howManyImages;
-
-  // this is actually a bug, it should be Math.round
-  // I will keep it though because it ends up being accurate after the webp files are clipped
-  // (there is a tendency for the smaller parts to be less than the sum of the whole)
-  // howManyImages = Math.round(webpFileSizeEquivalent/targetFileSize);
 
   const maximumRowsPerImage = Math.floor(targetFileSize/averageRowSizeInKb);
   let howManyImages = Math.floor(rows / maximumRowsPerImage);
 
-  if(howManyImages == 0) howManyImages = 1;
+  if(howManyImages === 0) howManyImages = 1;
 
   let groups = []
   for (let member of distributeInteger(rows, howManyImages)) {
@@ -103,11 +64,7 @@ async function clipSpriteThumbnail({
   // start current starting row at 1
   let currentStartingRow = 1;
   for (const [index, amountOfRows] of groups.entries()) {
-    const realIndex = index + 1;
-    const imageNumber = realIndex;
-    // console.log(realIndex , amountOfRows)
-
-    // const widthToUse = groups.length === 1 ? dimensions.width : totalWidth;
+    const imageNumber = index + 1;
 
     // increment the next starting row
     const finishingRow = currentStartingRow + (amountOfRows - 1) // if you do only 1 row you finish same row
@@ -139,25 +96,25 @@ async function clipSpriteThumbnail({
       // create Sharp instance
       const verticalJoinSharpInstance = await joinImages.joinImages(arrayOfImages, { direction: 'vertical'})
 
-
       // save Sharp instance to file
-      // TODO: have to change this here (to clear sprite image)
       const verticalJoinedImageResponse = await verticalJoinSharpInstance.toFile(finalOutputPath);
     }
 
+    //
     const webvttObject = {
       startingRow: currentStartingRow,
-      finishingRow: currentStartingRow + (amountOfRows - 1), // if you do only 1 row you finish same row
-      imageNumber: realIndex,
+      finishingRow, // if you do only 1 row you finish same row
+      imageNumber,
       amountOfRows
     }
 
+
     imagesWithRows.push(webvttObject);
 
+    // increment the starting row for next loop
     currentStartingRow = currentStartingRow + amountOfRows;
   }
 
-  console.log('running here!');
   return imagesWithRows
 }
 
