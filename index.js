@@ -130,7 +130,9 @@ async function createSpriteAndThumbnails({
       outputFolder: outputFileDirectory
     })
 
-    fs.remove(spriteOutputFilePath);
+    if(!debug){
+      fs.remove(spriteOutputFilePath);
+    }
 
     /** create vtt file with mappings **/
       // this is sync so doesn't need to be awaited
