@@ -1,6 +1,24 @@
 const sharp = require("sharp");
 const sizeOf = require('image-size')
 
+let distributeInteger = function* (total, divider) {
+  if (divider === 0) {
+    yield 0
+  } else {
+    let rest = total % divider
+    let result = total / divider
+
+    for (let i = 0; i < divider; i++) {
+      if (rest-- >0) {
+        yield Math.ceil(result)
+      } else {
+        yield Math.floor(result)
+      }
+    }
+  }
+}
+
+
 async function clipSpriteThumbnail({
    fullThumbnailPath,
    rows,
@@ -35,108 +53,75 @@ async function clipSpriteThumbnail({
   c.l('Calculated width:')
   c.l(totalWidth);
 
+  // used for creating the webvtt
   const imagesWithRows = [];
 
-  c.l('totalFileSize, targetFileSize');
-  c.l(totalFileSize, targetFileSize)
-
   // no need to compress
+  // cant skip because this is also used for webvtt
   // if(targetFileSize > totalFileSize) return
 
-  // rough estimate of how many times to split by total size divided by target
-  // TODO: this is named wrong, should be how many images
-  let howManySplits;
-  howManySplits = Math.floor(totalFileSize/targetFileSize);
+  const webpFileSizeEquivalent = Math.round(totalFileSize - (totalFileSize * 0.3));
 
-  if(howManySplits == 0) howManySplits = 1;
+  c.l('totalFileSize, targetFileSize, webpFileSizeEquivalent');
+  c.l(totalFileSize, targetFileSize, webpFileSizeEquivalent);
 
+  // rough estimate of how many images are needed with total size / target
+  let howManyImages;
 
-  c.l('rows, howManySplits')
-  c.l(rows, howManySplits);
+  // this is actually a bug, it should be Math.round
+  // I will keep it though because it ends up being accurate after the webp files are clipped
+  // (there is a tendency for the smaller parts to be less than the sum of the whole)
+  howManyImages = Math.round(webpFileSizeEquivalent/targetFileSize);
 
-  // how many rows that should happen per file
-  const amountOfRowsPerSplit = Math.floor(rows/howManySplits);
+  if(howManyImages == 0) howManyImages = 1;
 
-  c.l('amountOfRowsPerImage rows/howManySplits');
-  c.l(amountOfRowsPerSplit);
+  let groups = []
+  for (let member of distributeInteger(rows, howManyImages)) {
+    groups.push(member)
+  }
 
-  const remainder = rows - (amountOfRowsPerSplit * howManySplits)
-  c.l('remainder');
-  c.l(remainder);
+  c.l('groups')
+  c.l(groups);
 
-  // create an array for each split
-  const createdArray = Array.from({length: (howManySplits)}, (_, i) => i + 1)
+  // start current starting row at 1
+  let currentStartingRow = 1;
+  for (const [index, amountOfRows] of groups.entries()) {
+    const realIndex = index + 1;
+    // console.log(realIndex , amountOfRows)
 
-  c.l('createdArray for looping')
-  c.l(createdArray)
-  for(const [index, value] of createdArray.entries()){
-    c.l('value');
-    c.l(value);
+    const widthToUse = groups.length === 1 ? dimensions.width : totalWidth;
 
-    // how many rows per image (remainder will be added)
-    let amountOfRowsToHit = amountOfRowsPerSplit;
-
-    c.l('rows, # of rows to hit')
-    c.l(rows, amountOfRowsToHit);
-
-    // really should be renamed 'starting row'
-    const topPosition = (value - 1) * amountOfRowsToHit
-
-    c.l('starting row');
-    const startingRow = topPosition + 1
-    c.l(startingRow)
-
-    // add remainder to final clip
-    if(value == createdArray.length){
-      amountOfRowsToHit = amountOfRowsToHit + remainder
-    }
-
-    c.l('finishing row');
-    const finishingRow = topPosition + amountOfRowsToHit
-    c.l(finishingRow);
-
-    const thingObject = {
-      startingRow, finishingRow, imageNumber: value, amountOfRowsPerSplit
-    }
-
-    imagesWithRows.push(thingObject);
-
-    let finalHeight;
-    if(value === createdArray.length) {
-      c.l('LAST ONE!');
-      c.l('dimensons');
-      c.l(dimensions.width, dimensions.height)
-      const startingHeight =  (startingRow - 1) * imageHeight;
-      c.l('starting height');
-      c.l(startingHeight)
-      finalHeight = dimensions.height - startingHeight;
-      c.l('final height');
-      c.l(finalHeight)
-    }
-
-    // load details
+    // create image
     const splitObject = {
-      left: 0,
-      top: topPosition * imageHeight,
-      width: totalWidth,
-      height: finalHeight || amountOfRowsToHit * imageHeight,
+      left: 0, // always starting in left
+      top: ( currentStartingRow - 1) * imageHeight,
+      width: widthToUse, // always the full width of the image
+      height: amountOfRows * imageHeight,
     }
 
-    c.l('split object')
-    c.l(splitObject)
+    c.l('split object');
+    console.log(splitObject)
 
-    // return response
-    // create split
     if(extract){
       await image
         .extract(splitObject)
-        .toFile(`${outputFolder}/${filename}-${value}.webp`)
-
+        .toFile(`${outputFolder}/${filename}-${realIndex}.webp`)
     }
+
+    const webvttObject = {
+      startingRow: currentStartingRow,
+      finishingRow: currentStartingRow + (amountOfRows - 1), // if you do only 1 row you finish same row
+      imageNumber: realIndex,
+      amountOfRows
+    }
+
+    imagesWithRows.push(webvttObject);
+
+    currentStartingRow = currentStartingRow + amountOfRows
   }
 
+  console.log('running here!');
   return imagesWithRows
-
 }
 
 module.exports = clipSpriteThumbnail

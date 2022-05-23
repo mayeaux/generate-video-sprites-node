@@ -66,35 +66,42 @@ async function createFullImage({
     const sharpHorizontalInstance = await joinImages.joinImages(array, { direction: 'horizontal'});
 
     // save Sharp instance to file
-    const horizontalImageResponse = await sharpHorizontalInstance.toFile(`${horizontalImagesDirectory}/${x}.png`);
+    const horizontalImageResponse = await sharpHorizontalInstance.toFile(`${horizontalImagesDirectory}/${x}.jpg`);
   }
 
   // count how many horizontal images were created
   let amountOfHorizontalImages = fs.readdirSync(horizontalImagesDirectory)
-    .filter( function( elm ) {return elm.match(/.*\.(png?)/ig);})
+    .filter( function( elm ) {return elm.match(/.*\.(jpg?)/ig);})
     .length;
 
   // create array of horizontal images to join vertically
   let arrays = [];
   for(let x = 1 ; x < amountOfHorizontalImages + 1; x++){
-    arrays.push(`${horizontalImagesDirectory}/${x}.png`);
+    arrays.push(`${horizontalImagesDirectory}/${x}.jpg`);
   }
 
   // create Sharp instance
   const verticalJoinSharpInstance = await joinImages.joinImages(arrays, { direction: 'vertical'})
 
+  const finalOutputPath = `${finalImageDirectory}/video_sprite.jpg`
+
   // save Sharp instance to file
   // TODO: have to change this here (to clear sprite image)
-  const verticalJoinedImageResponse = await verticalJoinSharpInstance.toFile(spriteOutputFilePath);
+  const verticalJoinedImageResponse = await verticalJoinSharpInstance.toFile(finalOutputPath);
 
-  fs.copy(spriteOutputFilePath, `${finalImageDirectory}/video_sprite.webp`)
+
+  // TODO: refactor this so that it's smart enough to use the image from processing
+  await fs.copy(finalOutputPath, spriteOutputFilePath)
 
   // delete processing folder
   if(!debug){
     fs.removeSync(outputPath)
   }
 
-  return 'success'
+  return {
+    status: 'success',
+    finalOutputPath
+  }
 }
 
 module.exports = createFullImage;
