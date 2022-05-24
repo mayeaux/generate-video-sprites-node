@@ -30,7 +30,9 @@ function determineThumbnailWidthAndHeight(video, thumbnailLongestSide){
   const widthInPixels = Math.round(imageWidth);
   const heightInPixels = Math.round(imageHeight);
 
-  return `${widthInPixels}x${heightInPixels}`;
+  return {
+    heightInPixels, widthInPixels
+  }
 }
 
 /**
@@ -54,8 +56,6 @@ function determineThumbnailWidthAndHeight(video, thumbnailLongestSide){
 async function createSpriteAndThumbnails({
   inputFilePath,
   intervalInSecondsAsInteger,
-  widthInPixels,
-  heightInPixels,
   columns,
   spriteOutputFilePath,
   webVTTOutputFilePath,
@@ -79,7 +79,9 @@ async function createSpriteAndThumbnails({
 
     const videoStream = ffprobeResponse.streams.filter(stream => stream.codec_type === 'video')[0];
 
-    const sizeAsWidthxHeight = determineThumbnailWidthAndHeight(videoStream, thumbnailLongestSide);
+    const { widthInPixels, heightInPixels } = determineThumbnailWidthAndHeight(videoStream, thumbnailLongestSide);
+
+    const sizeAsWidthxHeight = `${widthInPixels}x${heightInPixels}`;
 
     const videoDurationInSeconds = Math.ceil(Number(videoStream.duration));
 
@@ -109,11 +111,10 @@ async function createSpriteAndThumbnails({
     /** clip thumbnails into smaller chunks **/
     const mappingArray = await clipThumbnail({
       columns,
-      rows: amountOfFiles, // todo: get this dynmically
+      rows: amountOfFiles,
       fullThumbnailPath: spriteOutputFilePath,
       imageWidth: widthInPixels,
       imageHeight: heightInPixels,
-      // totalFileSize: spriteFileSizeInKb,
       targetFileSize: targetSizeInKb,
       filename,
       debug,
@@ -121,10 +122,6 @@ async function createSpriteAndThumbnails({
       averageRowSizeInKb,
       outputFileDirectory
     })
-
-    if(!debug){
-      fs.remove(spriteOutputFilePath);
-    }
 
     /** create vtt file with mappings **/
       // this is sync so doesn't need to be awaited
@@ -143,6 +140,11 @@ async function createSpriteAndThumbnails({
       })
 
     c.l(cttResponse)
+
+    if(!debug){
+      fs.remove(spriteOutputFilePath);
+      fs.remove(`${outputFileDirectory}/processing`)
+    }
 
   } catch (err){
     c.l(err);

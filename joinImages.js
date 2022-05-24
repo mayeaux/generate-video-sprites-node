@@ -4,18 +4,13 @@ const fs = require('fs-extra');
 async function createFullImage({
    columns,
    outputPath,
-   spriteOutputFilePath,
-   debug
 }){
   const screenshotImagesDirectory = `${outputPath}/screenshotImages`;
   const horizontalImagesDirectory = `${outputPath}/horizontalImages`;
-  const finalImageDirectory = `${outputPath}/finalImage`;
 
   fs.mkdirSync(horizontalImagesDirectory, { recursive: true });
-  fs.mkdirSync(finalImageDirectory, { recursive: true });
 
   fs.emptyDirSync(horizontalImagesDirectory)
-  fs.emptyDirSync(finalImageDirectory)
 
   // how many screenshot images there are in total
   let amountOfFiles = fs.readdirSync(screenshotImagesDirectory)
@@ -81,51 +76,17 @@ async function createFullImage({
     var fileSizeInBytes = stats.size;
     var fileSizeInKb = Math.round(fileSizeInBytes / (1024));
     arrayOfRowSizes.push(fileSizeInKb)
-    console.log(fileSizeInKb)
+    c.l(fileSizeInKb)
   }
 
   const average = arr => arr.reduce( ( p, c ) => p + c, 0 ) / arr.length;
 
   const averageKbSize = Math.round(average(arrayOfRowSizes));
 
-  console.log('average kb size');
-  console.log(averageKbSize)
-
-  // console.log(amountOfHorizontalImages);
+  c.l('average kb size');
+  c.l(averageKbSize)
 
   return averageKbSize
-
-    // .length;
-
-  // create array of horizontal images to join vertically
-  let arrays = [];
-  for(let x = 1 ; x < amountOfHorizontalImages + 1; x++){
-    arrays.push(`${horizontalImagesDirectory}/${x}.jpg`);
-  }
-
-  // create Sharp instance
-  const verticalJoinSharpInstance = await joinImages.joinImages(arrays, { direction: 'vertical'})
-
-  const finalOutputPath = `${finalImageDirectory}/video_sprite.jpg`
-
-  // save Sharp instance to file
-  // TODO: have to change this here (to clear sprite image)
-  const verticalJoinedImageResponse = await verticalJoinSharpInstance.toFile(finalOutputPath);
-
-
-  // TODO: refactor this so that it's smart enough to use the image from processing
-  // TODO: right now this is saving a webp as a jpeg
-  await fs.copy(finalOutputPath, spriteOutputFilePath)
-
-  // delete processing folder
-  if(!debug){
-    fs.removeSync(outputPath)
-  }
-
-  return {
-    status: 'success',
-    finalOutputPath
-  }
 }
 
 module.exports = createFullImage;

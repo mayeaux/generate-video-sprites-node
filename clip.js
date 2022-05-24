@@ -84,14 +84,14 @@ async function clipSpriteThumbnail({
 
     if(rangeArray.length === 1){
       const currentDirectory = `${horizontalImagesDirectory}/${rangeArray[0]}.webp`;
-      fs.copy(currentDirectory, finalOutputPath)
+      await fs.copy(currentDirectory, finalOutputPath)
     } else {
       let arrayOfImages = [];
       for(const horizontalImageNumber of rangeArray){
         arrayOfImages.push(`${horizontalImagesDirectory}/${horizontalImageNumber}.webp`);
       }
 
-      console.log(arrayOfImages);
+      c.l(arrayOfImages);
 
       // create Sharp instance
       const verticalJoinSharpInstance = await joinImages.joinImages(arrayOfImages, { direction: 'vertical'})
@@ -114,6 +114,9 @@ async function clipSpriteThumbnail({
     // increment the starting row for next loop
     currentStartingRow = currentStartingRow + amountOfRows;
   }
+
+  c.l('images with rows');
+  c.l(imagesWithRows);
 
   return imagesWithRows
 }
