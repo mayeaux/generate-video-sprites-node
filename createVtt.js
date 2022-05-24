@@ -69,18 +69,18 @@ function createVTT({
     // x value is the column number times the width, but then move over one full column width to start at the left
     const xValue = ( column * width ) - width
 
-    c.l('row')
-    c.l(row);
+    // c.l('row')
+    // c.l(row);
 
     // based on which row is passed, know which image to point towards
     const { startingRow, finishingRow, imageNumber, amountOfRowsPerSplit }  = getImageNumberFromRow(mappingArray, row);
 
-    c.l(imageNumber, amountOfRowsPerSplit)
+    // c.l(imageNumber, amountOfRowsPerSplit)
 
     // how many pixels to move downwards
     const yValue = (finishingRow - startingRow) * height
 
-    c.l(yValue);
+    // c.l(yValue);
 
     const filePathToUse = `${filename}-${imageNumber}`
 

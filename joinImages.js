@@ -4,18 +4,13 @@ const fs = require('fs-extra');
 async function createFullImage({
    columns,
    outputPath,
-   spriteOutputFilePath,
-   debug
 }){
   const screenshotImagesDirectory = `${outputPath}/screenshotImages`;
   const horizontalImagesDirectory = `${outputPath}/horizontalImages`;
-  const finalImageDirectory = `${outputPath}/finalImage`;
 
   fs.mkdirSync(horizontalImagesDirectory, { recursive: true });
-  fs.mkdirSync(finalImageDirectory, { recursive: true });
 
   fs.emptyDirSync(horizontalImagesDirectory)
-  fs.emptyDirSync(finalImageDirectory)
 
   // how many screenshot images there are in total
   let amountOfFiles = fs.readdirSync(screenshotImagesDirectory)
@@ -66,42 +61,32 @@ async function createFullImage({
     const sharpHorizontalInstance = await joinImages.joinImages(array, { direction: 'horizontal'});
 
     // save Sharp instance to file
-    const horizontalImageResponse = await sharpHorizontalInstance.toFile(`${horizontalImagesDirectory}/${x}.jpg`);
+    const horizontalImageResponse = await sharpHorizontalInstance.toFile(`${horizontalImagesDirectory}/${x}.webp`);
   }
 
   // count how many horizontal images were created
-  let amountOfHorizontalImages = fs.readdirSync(horizontalImagesDirectory)
-    .filter( function( elm ) {return elm.match(/.*\.(jpg?)/ig);})
-    .length;
+  let horizontalImages = fs.readdirSync(horizontalImagesDirectory)
+    .filter( function( elm ) {return elm.match(/.*\.(webp?)/ig);})
 
-  // create array of horizontal images to join vertically
-  let arrays = [];
-  for(let x = 1 ; x < amountOfHorizontalImages + 1; x++){
-    arrays.push(`${horizontalImagesDirectory}/${x}.jpg`);
+  let arrayOfRowSizes = [];
+
+  for(const image of horizontalImages){
+    const horizontalFile = `${horizontalImagesDirectory}/${image}`;
+    var stats = fs.statSync(horizontalFile)
+    var fileSizeInBytes = stats.size;
+    var fileSizeInKb = Math.round(fileSizeInBytes / (1024));
+    arrayOfRowSizes.push(fileSizeInKb)
+    c.l(fileSizeInKb)
   }
 
-  // create Sharp instance
-  const verticalJoinSharpInstance = await joinImages.joinImages(arrays, { direction: 'vertical'})
+  const average = arr => arr.reduce( ( p, c ) => p + c, 0 ) / arr.length;
 
-  const finalOutputPath = `${finalImageDirectory}/video_sprite.jpg`
+  const averageKbSize = Math.round(average(arrayOfRowSizes));
 
-  // save Sharp instance to file
-  // TODO: have to change this here (to clear sprite image)
-  const verticalJoinedImageResponse = await verticalJoinSharpInstance.toFile(finalOutputPath);
+  c.l('average kb size');
+  c.l(averageKbSize)
 
-
-  // TODO: refactor this so that it's smart enough to use the image from processing
-  await fs.copy(finalOutputPath, spriteOutputFilePath)
-
-  // delete processing folder
-  if(!debug){
-    fs.removeSync(outputPath)
-  }
-
-  return {
-    status: 'success',
-    finalOutputPath
-  }
+  return averageKbSize
 }
 
 module.exports = createFullImage;

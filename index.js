@@ -2,10 +2,38 @@ const ffprobe = require('ffprobe');
 const fs = require('fs-extra');
 ffprobeStatic = require('ffprobe-static');
 const clipThumbnail = require('./clip');
-const sizeOf = require('image-size')
 const createSpriteImage = require('./createSpriteImage');
 const createVTT = require('./createVtt');
 require('./logging');
+
+function determineThumbnailWidthAndHeight(video, thumbnailLongestSide){
+  let verticalVideo = video.width < video.height;
+
+  let aspectRatio = video.width / video.height;
+  if (verticalVideo){
+    aspectRatio = video.height / video.width;
+  }
+
+  const multiply = thumbnailLongestSide / aspectRatio;
+  c.l(`aspect ratio: ${aspectRatio}`);
+  c.l(`multiply: ${multiply}`);
+
+  let imageWidth = aspectRatio * multiply
+  let imageHeight = imageWidth / aspectRatio;
+  if(verticalVideo){
+    imageHeight = aspectRatio * multiply
+    imageWidth = imageHeight / aspectRatio;
+  }
+
+  c.l(`image height: ${imageHeight}, image width: ${imageWidth}`);
+
+  const widthInPixels = Math.round(imageWidth);
+  const heightInPixels = Math.round(imageHeight);
+
+  return {
+    heightInPixels, widthInPixels
+  }
+}
 
 /**
  * Main exported function that is used to compile the sprite/webvtt
@@ -28,8 +56,6 @@ require('./logging');
 async function createSpriteAndThumbnails({
   inputFilePath,
   intervalInSecondsAsInteger,
-  widthInPixels,
-  heightInPixels,
   columns,
   spriteOutputFilePath,
   webVTTOutputFilePath,
@@ -49,37 +75,11 @@ async function createSpriteAndThumbnails({
       };
     }
 
-    const ffprobe1 = await ffprobe(inputFilePath, { path: ffprobeStatic.path });
+    const ffprobeResponse = await ffprobe(inputFilePath, { path: ffprobeStatic.path });
 
-    let videoStream;
-    for(const stream of ffprobe1.streams){
-      if(stream.codec_type === 'video'){
-        videoStream = stream
-      }
-    }
+    const videoStream = ffprobeResponse.streams.filter(stream => stream.codec_type === 'video')[0];
 
-    let verticalVideo = videoStream.width < videoStream.height;
-
-    let aspectRatio = videoStream.width / videoStream.height;
-    if (verticalVideo){
-      aspectRatio = videoStream.height / videoStream.width;
-    }
-
-    const multiply = thumbnailLongestSide / aspectRatio;
-    c.l(`aspect ratio: ${aspectRatio}`);
-    c.l(`multiply: ${multiply}`);
-
-    let imageWidth = aspectRatio * multiply
-    let imageHeight = imageWidth / aspectRatio;
-    if(verticalVideo){
-      imageHeight = aspectRatio * multiply
-      imageWidth = imageHeight / aspectRatio;
-    }
-
-    c.l(`image height: ${imageHeight}, image width: ${imageWidth}`);
-
-    widthInPixels = Math.round(imageWidth);
-    heightInPixels = Math.round(imageHeight);
+    const { widthInPixels, heightInPixels } = determineThumbnailWidthAndHeight(videoStream, thumbnailLongestSide);
 
     const sizeAsWidthxHeight = `${widthInPixels}x${heightInPixels}`;
 
@@ -89,7 +89,7 @@ async function createSpriteAndThumbnails({
 
     c.l(videoDurationInSeconds);
 
-    const response = await createSpriteImage({
+    const averageRowSizeInKb = await createSpriteImage({
       columns,
       videoPath: inputFilePath,
       screenshotIntervalInSeconds: intervalInSecondsAsInteger,
@@ -99,40 +99,29 @@ async function createSpriteAndThumbnails({
       debug
     })
 
-    c.l(`Sprite image creation: ${response.status}`)
+    c.l(`Sprite image creation: ${averageRowSizeInKb}`)
 
-    // const { finalOutputPath } = response;
+    const horizontalImagesDirectory = `${outputFileDirectory}/processing/horizontalImages`;
 
-    const spriteFileSizeInKb = ((await fs.promises.stat(spriteOutputFilePath)).size/1000)
+    let amountOfFiles = fs.readdirSync(horizontalImagesDirectory)
+      .filter( function( elm ) {return elm.match(/.*\.(webp?)/ig);})
+      .length;
 
-    const amountOfThumbnails = Math.ceil(videoDurationInSeconds / intervalInSecondsAsInteger);
-    c.l(`amount of thumbnails: ${amountOfThumbnails}`);
-
-    c.l(`amount of columns: ${columns}`);
-
-    const dimensions = sizeOf(spriteOutputFilePath);
-    c.l(`Image size: ${dimensions}`)
-
-    const amountOfRows = dimensions.height / heightInPixels
-    c.l(`amount of rows: ${amountOfRows}`);
 
     /** clip thumbnails into smaller chunks **/
     const mappingArray = await clipThumbnail({
       columns,
-      rows: amountOfRows,
+      rows: amountOfFiles,
       fullThumbnailPath: spriteOutputFilePath,
       imageWidth: widthInPixels,
       imageHeight: heightInPixels,
-      totalFileSize: spriteFileSizeInKb,
       targetFileSize: targetSizeInKb,
       filename,
       debug,
-      outputFolder: outputFileDirectory
+      outputFolder: outputFileDirectory,
+      averageRowSizeInKb,
+      outputFileDirectory
     })
-
-    if(!debug){
-      fs.remove(spriteOutputFilePath);
-    }
 
     /** create vtt file with mappings **/
       // this is sync so doesn't need to be awaited
@@ -151,6 +140,11 @@ async function createSpriteAndThumbnails({
       })
 
     c.l(cttResponse)
+
+    if(!debug){
+      fs.remove(spriteOutputFilePath);
+      fs.remove(`${outputFileDirectory}/processing`)
+    }
 
   } catch (err){
     c.l(err);
