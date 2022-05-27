@@ -78,7 +78,7 @@ function createVTT({
     // c.l(imageNumber, amountOfRowsPerSplit)
 
     // how many pixels to move downwards
-    const yValue = (finishingRow - startingRow) * height
+    const yValue = (row - startingRow) * height
 
     // c.l(yValue);
 
