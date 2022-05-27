@@ -1,5 +1,3 @@
-const sharp = require("sharp");
-const sizeOf = require('image-size')
 const joinImages = require("join-images");
 const fs = require('fs-extra');
 
@@ -36,7 +34,8 @@ async function clipSpriteThumbnail({
    targetFileSize,
    debug = false,
    averageRowSizeInKb,
-   outputFileDirectory
+   outputFileDirectory,
+   filename
 }){
 
   if(!debug){
@@ -69,10 +68,7 @@ async function clipSpriteThumbnail({
     // increment the next starting row
     const finishingRow = currentStartingRow + (amountOfRows - 1) // if you do only 1 row you finish same row
 
-    c.l('starting, ending');
-    c.l(currentStartingRow, finishingRow)
-
-    c.l('start, finish row');
+    c.l('starting row, ending row');
     c.l(currentStartingRow, finishingRow)
 
     const rangeArray = range(currentStartingRow, finishingRow);
@@ -80,7 +76,7 @@ async function clipSpriteThumbnail({
 
     const horizontalImagesDirectory = `${outputFileDirectory}/processing/horizontalImages`;
 
-    const finalOutputPath = `${outputFileDirectory}/video-${imageNumber}.webp`
+    const finalOutputPath = `${outputFileDirectory}/${filename}-${imageNumber}.webp`
 
     if(rangeArray.length === 1){
       const currentDirectory = `${horizontalImagesDirectory}/${rangeArray[0]}.webp`;
