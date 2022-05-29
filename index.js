@@ -1,10 +1,12 @@
 const ffprobe = require('ffprobe');
 const fs = require('fs-extra');
-ffprobeStatic = require('ffprobe-static');
 const clipThumbnail = require('./clip');
 const createSpriteImage = require('./createSpriteImage');
+const which = require('which')
 const createVTT = require('./createVtt');
 require('./logging');
+
+const ffprobePath = which.sync('ffprobe')
 
 function determineThumbnailWidthAndHeight(video, thumbnailLongestSide){
   let verticalVideo = video.width < video.height;
@@ -75,7 +77,7 @@ async function createSpriteAndThumbnails({
       };
     }
 
-    const ffprobeResponse = await ffprobe(inputFilePath, { path: ffprobeStatic.path });
+    const ffprobeResponse = await ffprobe(inputFilePath, { path: ffprobePath });
 
     const videoStream = ffprobeResponse.streams.filter(stream => stream.codec_type === 'video')[0];
 
