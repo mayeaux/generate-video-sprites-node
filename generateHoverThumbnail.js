@@ -1,60 +1,149 @@
 const ffmpeg = require('fluent-ffmpeg');
-const ffprobe = require("ffprobe");
 const which = require('which')
+const path = require('path')
+const ffprobe = require("ffprobe");
+const fs = require("fs-extra");
 
-const l = console.log;
+let l = console.log;
 
-ffmpeg.setFfmpegPath('/usr/local/bin/ffmpeg');
+const getExt = path.extname;
+
 const ffprobePath = which.sync('ffprobe')
 
-// algorithm, 1/4 the way in , 5 seconds at 2x speed
-
-
-async function main(){
-  const inputFilePath = './examples/assets/output10.mp4';
-
-  const ffprobeResponse = await ffprobe(inputFilePath, { path: ffprobePath });
-
-  const videoStream = ffprobeResponse.streams.filter(stream => stream.codec_type === 'video')[0];
-
-  l(videoStream);
-
-  const videoDurationInSeconds = Math.ceil(Number(videoStream.duration));
-
-  l(videoDurationInSeconds);
-
-  // await generateHoverPreviewThumbnail({ path: inputFilePath, outputFolder: '.' })
-
-  // await trimFile({ path: inputFilePath, outputFolder: '.' })
-
-  await speedUpFile({ path: inputFilePath, outputFolder: '.' })
-}
-
-main();
-
+// TODO: algorithm, 1/4 the way in , 5 seconds at 2x speed
 const FRAMERATE = 6;
 const WIDTH = 320;
 const HEIGHT = 180;
 // Set compression of webp images between 1-100 with 100 being perfect.
 const QUALITY = 70;
 const AMOUNT_OF_SECONDS = 5;
-const STARTING_SECONDS = 24; // TODO: replace with length getting algorithm
+const STARTING_SECONDS = 20; // TODO: replace with length getting algorithm
+
+async function generateHoverThumbnail({ inputFilePath, outputFolder, filename, debug }){
+  if(!debug) l = function(){};
+
+  try {
+    const fileExtension = getExt(inputFilePath);
+
+    const ffprobeResponse = await ffprobe(inputFilePath, { path: ffprobePath });
+
+    const videoStream = ffprobeResponse.streams.filter(stream => stream.codec_type === 'video')[0];
+
+    const videoDurationInSeconds = Math.ceil(Number(videoStream.duration));
+
+    l(videoDurationInSeconds);
+
+    const trimmedFilePath = `${outputFolder}/${filename}-trimmed${fileExtension}`;
+
+    await trimFile({
+      inputFilePath,
+      outputFilePath: trimmedFilePath,
+    })
+
+    const spedUpFilePath = `${outputFolder}/${filename}-sped-up${fileExtension}`;
+
+    await speedUpFile({
+      inputFilePath: trimmedFilePath,
+      outputFilePath: spedUpFilePath,
+    })
+
+    const hoverThumbnailFilePath = `${outputFolder}/${filename}.webp`;
+
+    await generateHoverPreviewThumbnail({
+      inputFilePath: spedUpFilePath,
+      outputFilePath: hoverThumbnailFilePath,
+    })
+
+    if(!debug){
+      fs.remove(spedUpFilePath);
+      fs.remove(trimmedFilePath)
+    }
+  } catch (err){
+    l(err)
+    throw new Error(err);
+  }
+}
 
 /**
  *
- * @param path
- * @param fps
- * @param size
- * @param outputFolder
+ * @param inputFilePath
+ * @param outputFilePath
+ * @returns {Promise<unknown>}
+ */
+async function trimFile(
+  {
+    inputFilePath, outputFilePath
+  }
+){
+  return new Promise(function (resolve, reject) {
+    ffmpeg(inputFilePath)
+      .outputOptions(`-vcodec libx264`)
+      .outputOptions(`-an`)
+      .outputOptions(`-ss ${STARTING_SECONDS}`) // where to start the trim
+      .outputOptions(`-t ${AMOUNT_OF_SECONDS}`) // should always be 5 seconds trimmed
+      .on('start', function (commandLine) {
+        l('Spawned Ffmpeg with command: ' + commandLine);
+      })
+      .on('error', function (error) {
+        console.log(error);
+        return reject(new Error(error))
+      })
+      .on('progress', function (progress) {
+        l(`PROGRESS: ${Math.ceil(progress.percent)}%`);
+      })
+      .on('end', async () => {
+        l('Processing finished !');
+        resolve('success');
+
+      }).save(outputFilePath);
+  })
+}
+
+/**
+ *
+ * @param inputFilePath
+ * @param outputFilePath
+ * @returns {Promise<unknown>}
+ */
+async function speedUpFile(
+  {
+    inputFilePath, outputFilePath
+  }
+){
+  return new Promise(function (resolve, reject) {
+    ffmpeg(inputFilePath)
+      .outputOptions(`-vf setpts=0.5*PTS`) // speeds up 2x speed
+      .on('start', function (commandLine) {
+        l('Spawned Ffmpeg with command: ' + commandLine);
+      })
+      .on('error', function (error) {
+        console.log(error);
+        return reject(new Error(error))
+      })
+      .on('progress', function (progress) {
+        l(`PROGRESS: ${Math.ceil(progress.percent)}%`);
+      })
+      .on('end', async () => {
+        l('Processing finished !');
+        resolve('success');
+
+      }).save(outputFilePath);
+  })
+}
+
+/**
+ *
+ * @param inputFilePath
+ * @param outputFilePath
  * @returns {Promise<unknown>}
  */
 async function generateHoverPreviewThumbnail(
   {
-    path, outputFolder
+    inputFilePath, outputFilePath
   }
 ){
   return new Promise(function (resolve, reject) {
-    ffmpeg(path)
+    ffmpeg(inputFilePath)
       .outputOptions(`-vcodec libwebp`)
       .outputOptions(`-vf fps=${FRAMERATE},scale=${WIDTH}:${HEIGHT}`)
       // .outputOptions(`-preset default`)
@@ -69,87 +158,15 @@ async function generateHoverPreviewThumbnail(
         return reject(new Error(error))
       })
       .on('progress', function (progress) {
-        l(`CONVERTED: ${Math.ceil(progress.percent)}%`);
+        l(`PROGRESS: ${Math.ceil(progress.percent)}%`);
       })
       .on('end', async () => {
         l('Processing finished !');
         resolve('success');
 
-      }).save(`${outputFolder}/thing.webp`);
+      }).save(outputFilePath);
   })
 }
 
+module.exports = generateHoverThumbnail
 
-/**
- *
- * @param path
- * @param fps
- * @param size
- * @param outputFolder
- * @returns {Promise<unknown>}
- */
-async function trimFile(
-  {
-    path, outputFolder
-  }
-){
-  return new Promise(function (resolve, reject) {
-    ffmpeg(path)
-      .outputOptions(`-vcodec libx264`)
-      .outputOptions(`-an`)
-      .outputOptions(`-t ${AMOUNT_OF_SECONDS}`)
-      .outputOptions(`-ss ${STARTING_SECONDS}`)
-      .on('start', function (commandLine) {
-        l('Spawned Ffmpeg with command: ' + commandLine);
-      })
-      .on('error', function (error) {
-        console.log(error);
-        return reject(new Error(error))
-      })
-      .on('progress', function (progress) {
-        l(`CONVERTED: ${Math.ceil(progress.percent)}%`);
-      })
-      .on('end', async () => {
-        l('Processing finished !');
-        resolve('success');
-
-      }).save(`${outputFolder}/thing.mp4`);
-  })
-}
-
-/**
- *
- * @param path
- * @param fps
- * @param size
- * @param outputFolder
- * @returns {Promise<unknown>}
- */
-async function speedUpFile(
-  {
-    path, outputFolder
-  }
-){
-  return new Promise(function (resolve, reject) {
-    ffmpeg(path)
-      .outputOptions(`-vf setpts=0.5*PTS`)
-      .on('start', function (commandLine) {
-        l('Spawned Ffmpeg with command: ' + commandLine);
-      })
-      .on('error', function (error) {
-        console.log(error);
-        return reject(new Error(error))
-      })
-      .on('progress', function (progress) {
-        l(`CONVERTED: ${Math.ceil(progress.percent)}%`);
-      })
-      .on('end', async () => {
-        l('Processing finished !');
-        resolve('success');
-
-      }).save(`${outputFolder}/thing1.mp4`);
-  })
-}
-
-
-// module.exports = generateHoverPreviewThumbnail;
