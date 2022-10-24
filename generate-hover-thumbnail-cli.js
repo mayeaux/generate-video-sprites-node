@@ -8,6 +8,10 @@ program
   .requiredOption('-i, --inputFilePath <type>', 'Path to the video that the .webp hover thumbnail will be created for')
   .requiredOption('--outputFolder <type>', 'Path to the folder where the hover thumbnail .webp file will be outputted')
   .requiredOption('--filename <type>', 'Filename to be declared (so it will output ${filename}.webp at the outputPath')
+  .option('--quality <type>', 'Quality of the .webp from 1 to 100 (100 is full quality)')
+  .option('--framerate <type>', 'Framerate to be used in the .webp')
+  .option('--height <type>', 'Height in pixels')
+  .option('--width <type>', 'Width in pixels')
   .option('--debug', 'Logs a bunch of stuff and preserves the files as they\'re created')
 
 program.parse();
@@ -19,6 +23,10 @@ const {
   filename,
   outputFolder,
   debug,
+  quality,
+  framerate,
+  height,
+  width
 } = options;
 
 fs.mkdirSync(outputFolder, { recursive: true });
@@ -35,6 +43,10 @@ generateHoverThumbnail({
   filename,
   outputFolder,
   debug,
+  framerate,
+  quality,
+  height,
+  width
 })
 
 // Example to use:

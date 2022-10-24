@@ -10,14 +10,23 @@ const getExt = path.extname;
 
 const ffprobePath = which.sync('ffprobe')
 
-// haven't fully massaged these, but generally should be OK quality with ~100-150kb
-// Set compression of webp images between 1-100 with 100 being perfect.
-const QUALITY = 70;
+/** default values **/
+// haven't fully massaged these, but generally should be OK quality at ~100-150kb
+const QUALITY = 70; // Set compression of webp images between 1-100 with 100 being perfect.
 const FRAMERATE = 6;
 const WIDTH = 320;
 const HEIGHT = 180;
 
-async function generateHoverThumbnail({ inputFilePath, outputFolder, filename, debug }){
+async function generateHoverThumbnail({
+  inputFilePath,
+  outputFolder,
+  filename,
+  quality,
+  framerate,
+  width,
+  height,
+  debug
+}){
   if(!debug) l = function(){};
 
   try {
@@ -53,11 +62,26 @@ async function generateHoverThumbnail({ inputFilePath, outputFolder, filename, d
       outputFilePath: spedUpFilePath,
     })
 
+    // load from the defaults if not received from the cli
+    quality = quality || QUALITY;
+    framerate = framerate || FRAMERATE;
+    width = width || WIDTH;
+    height = height || HEIGHT;
+
+    l(`quality: ${quality}`);
+    l(`framerate: ${framerate}`);
+    l(`width: ${width}`);
+    l(`height: ${height}`);
+
     const hoverThumbnailFilePath = `${outputFolder}/${filename}.webp`;
 
     await generateHoverPreviewThumbnail({
       inputFilePath: spedUpFilePath,
       outputFilePath: hoverThumbnailFilePath,
+      quality,
+      framerate,
+      width,
+      height,
     })
 
     if(!debug){
@@ -159,21 +183,25 @@ async function speedUpFile(
  *
  * @param inputFilePath
  * @param outputFilePath
+ * @param quality
+ * @param framerate
+ * @param height
+ * @param width
  * @returns {Promise<unknown>}
  */
 async function generateHoverPreviewThumbnail(
   {
-    inputFilePath, outputFilePath
+    inputFilePath, outputFilePath, quality, framerate, height, width
   }
 ){
   return new Promise(function (resolve, reject) {
     ffmpeg(inputFilePath)
       .outputOptions(`-vcodec libwebp`)
-      .outputOptions(`-vf fps=${FRAMERATE},scale=${WIDTH}:${HEIGHT}`)
+      .outputOptions(`-vf fps=${framerate},scale=${width}:${height}`)
       // .outputOptions(`-preset default`)
       .outputOptions(`-loop 0`)
       .outputOptions(`-vsync 0`)
-      .outputOptions(`-qscale ${QUALITY}`)
+      .outputOptions(`-qscale ${quality}`)
       .on('start', function (commandLine) {
         l('Spawned Ffmpeg with command: ' + commandLine);
       })
