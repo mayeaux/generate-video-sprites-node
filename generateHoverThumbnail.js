@@ -10,14 +10,12 @@ const getExt = path.extname;
 
 const ffprobePath = which.sync('ffprobe')
 
-// TODO: algorithm, 1/4 the way in , 5 seconds at 2x speed
+// haven't fully massaged these, but generally should be OK quality with ~100-150kb
+// Set compression of webp images between 1-100 with 100 being perfect.
+const QUALITY = 70;
 const FRAMERATE = 6;
 const WIDTH = 320;
 const HEIGHT = 180;
-// Set compression of webp images between 1-100 with 100 being perfect.
-const QUALITY = 70;
-const AMOUNT_OF_SECONDS = 5;
-const STARTING_SECONDS = 20; // TODO: replace with length getting algorithm
 
 async function generateHoverThumbnail({ inputFilePath, outputFolder, filename, debug }){
   if(!debug) l = function(){};
@@ -31,13 +29,21 @@ async function generateHoverThumbnail({ inputFilePath, outputFolder, filename, d
 
     const videoDurationInSeconds = Math.ceil(Number(videoStream.duration));
 
-    l(videoDurationInSeconds);
+    l(`Video duration in seconds: ${videoDurationInSeconds}`);
+
+    const { timeToTrimInSeconds, startingTimeInSeconds } = determineStartingTimeAndSeconds(videoDurationInSeconds);
+
+    l(`timeToTrimInSeconds: ${timeToTrimInSeconds}`);
+
+    l(`startingTimeInSeconds: ${startingTimeInSeconds}`);
 
     const trimmedFilePath = `${outputFolder}/${filename}-trimmed${fileExtension}`;
 
     await trimFile({
       inputFilePath,
       outputFilePath: trimmedFilePath,
+      timeToTrimInSeconds,
+      startingTimeInSeconds
     })
 
     const spedUpFilePath = `${outputFolder}/${filename}-sped-up${fileExtension}`;
@@ -64,23 +70,41 @@ async function generateHoverThumbnail({ inputFilePath, outputFolder, filename, d
   }
 }
 
+function determineStartingTimeAndSeconds(videoLengthInSeconds){
+  let startingTimeInSeconds, timeToTrimInSeconds;
+  if(videoLengthInSeconds <= 5){
+    startingTimeInSeconds = 0;
+    timeToTrimInSeconds = videoLengthInSeconds
+  } else {
+    startingTimeInSeconds = Math.floor(videoLengthInSeconds / 4);
+    timeToTrimInSeconds = 5;
+  }
+
+  return {
+    startingTimeInSeconds,
+    timeToTrimInSeconds
+  }
+}
+
 /**
  *
  * @param inputFilePath
  * @param outputFilePath
+ * @param timeToTrimInSeconds
+ * @param startingTimeInSeconds
  * @returns {Promise<unknown>}
  */
 async function trimFile(
   {
-    inputFilePath, outputFilePath
+    inputFilePath, outputFilePath, timeToTrimInSeconds, startingTimeInSeconds
   }
 ){
   return new Promise(function (resolve, reject) {
     ffmpeg(inputFilePath)
       .outputOptions(`-vcodec libx264`)
       .outputOptions(`-an`)
-      .outputOptions(`-ss ${STARTING_SECONDS}`) // where to start the trim
-      .outputOptions(`-t ${AMOUNT_OF_SECONDS}`) // should always be 5 seconds trimmed
+      .outputOptions(`-ss ${startingTimeInSeconds}`) // where to start the trim
+      .outputOptions(`-t ${timeToTrimInSeconds}`) // should always be 5 seconds trimmed
       .on('start', function (commandLine) {
         l('Spawned Ffmpeg with command: ' + commandLine);
       })
